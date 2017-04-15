@@ -1,7 +1,7 @@
 GKTW_empirical
 --------------
 
-This package does the empirical work for GKTW, "Occupational Switching and Self-Discovery in the Labor Market".
+This package does the empirical work for GKTW, "Multidimensional Skill Mismatch".
 
 The first 3 codes setup the data set, extracting it from the NLSY and cleaning it.
 
