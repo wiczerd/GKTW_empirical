@@ -6,8 +6,5 @@ data/health*
 data/social*
 data/temp*
 data/weekly*
-data/yearly_01.dta
-data/yearly_02.dta
 download/*
-onetstata/*
 
