@@ -1,10 +1,12 @@
 data/demographics*
 data/employment*
+data/earnings*
 data/ern*
 data/health*
 data/social*
 data/temp*
 data/weekly*
 download/*
+onetstata/ONET_ASVAB.dta
+onetstata/ONET_KSA.dta
 data/*
-onetstata/*
