@@ -1,0 +1,28 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{6}{c}}
+\hline  
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}&\multicolumn{1}{c}{(6)}\\
+                    &\multicolumn{1}{c}{IV}&\multicolumn{1}{c}{IV}&\multicolumn{1}{c}{IV}&\multicolumn{1}{c}{OLS}&\multicolumn{1}{c}{OLS}&\multicolumn{1}{c}{OLS}\\
+\hline  
+Mismatch            &     -0.0262\sym{***}&     -0.0136\sym{***}&     -0.0050         &     -0.0239\sym{***}&     -0.0188\sym{***}&     -0.0136\sym{***}\\
+[1em]
+Mismatch $\times$ Occ Tenure&                     &     -0.0020\sym{***}&     -0.0024\sym{***}&                     &     -0.0008\sym{*}  &     -0.0006         \\
+[1em]
+Cumul Mismatch      &                     &                     &     -0.0335\sym{***}&                     &                     &     -0.0345\sym{***}\\
+[1em]
+Worker Ability (Mean)&      0.1849\sym{***}&      0.1823\sym{***}&      0.2720\sym{***}&      0.1584\sym{***}&      0.1570\sym{***}&      0.2570\sym{***}\\
+[1em]
+Worker Ability $\times$ Experience&      0.0094\sym{***}&      0.0099\sym{***}&      0.0073\sym{***}&      0.0122\sym{***}&      0.0123\sym{***}&      0.0080\sym{***}\\
+[1em]
+Worker Ability $\times$ Occ Tenure&      0.0073\sym{**} &      0.0062\sym{*}  &      0.0067         &      0.0037\sym{*}  &      0.0035         &      0.0065\sym{**} \\
+[1em]
+Occ Reqs (Mean)     &      0.1531\sym{***}&      0.1531\sym{***}&      0.1577\sym{***}&      0.2077\sym{***}&      0.2076\sym{***}&      0.2211\sym{***}\\
+[1em]
+Occ Reqs $\times$ Occ Tenure&      0.0155\sym{***}&      0.0154\sym{***}&      0.0161\sym{***}&      0.0072\sym{***}&      0.0072\sym{***}&      0.0062\sym{***}\\
+\hline  
+Observations        &       44591         &       44591         &       33072         &       44591         &       44591         &       33072         \\
+\(R^{2}\)           &       0.356         &       0.356         &       0.314         &       0.372         &       0.372         &       0.332         \\
+\hline  
+\end{tabular}
+}

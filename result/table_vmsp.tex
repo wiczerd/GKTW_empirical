@@ -1,0 +1,26 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{6}{c}}
+\hline  
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}&\multicolumn{1}{c}{(6)}\\
+                    &\multicolumn{1}{c}{IV}&\multicolumn{1}{c}{IV}&\multicolumn{1}{c}{IV}&\multicolumn{1}{c}{OLS}&\multicolumn{1}{c}{OLS}&\multicolumn{1}{c}{OLS}\\
+\hline  
+Mismatch            &     -0.0275\sym{***}&     -0.0126\sym{***}&     -0.0048         &     -0.0271\sym{***}&     -0.0214\sym{***}&     -0.0158\sym{***}\\
+[1em]
+Mismatch $\times$ Occ Tenure&                     &     -0.0023\sym{***}&     -0.0021\sym{***}&                     &     -0.0009\sym{**} &     -0.0003         \\
+[1em]
+Cumul Mismatch      &                     &                     &     -0.0374\sym{***}&                     &                     &     -0.0374\sym{***}\\
+[1em]
+Worker Ability (Mean)&      0.2416\sym{***}&      0.2447\sym{***}&      0.3445\sym{***}&      0.2682\sym{***}&      0.2686\sym{***}&      0.3414\sym{***}\\
+[1em]
+Worker Ability $\times$ Occ Tenure&      0.0177\sym{***}&      0.0169\sym{***}&      0.0178\sym{***}&      0.0116\sym{***}&      0.0114\sym{***}&      0.0156\sym{***}\\
+[1em]
+Occ Reqs (Mean)     &      0.1728\sym{***}&      0.1710\sym{***}&      0.1683\sym{***}&      0.2202\sym{***}&      0.2193\sym{***}&      0.2247\sym{***}\\
+[1em]
+Occ Reqs $\times$ Occ Tenure&      0.0123\sym{***}&      0.0124\sym{***}&      0.0120\sym{***}&      0.0050\sym{***}&      0.0051\sym{***}&      0.0036\sym{**} \\
+\hline  
+Observations        &       37738         &       37738         &       28115         &       37738         &       37738         &       28115         \\
+\(R^{2}\)           &       0.352         &       0.352         &       0.315         &       0.368         &       0.368         &       0.332         \\
+\hline  
+\end{tabular}
+}

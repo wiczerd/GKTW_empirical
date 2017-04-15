@@ -1,0 +1,4 @@
+./onetstata/ONET_KSA.dta filter=lfs diff=lfs merge=lfs -text
+./data/yearly_01.dta filter=lfs diff=lfs merge=lfs -text
+./data/yearly_02.dta filter=lfs diff=lfs merge=lfs -text
+./onetstata/ONET_ASVAB.dta filter=lfs diff=lfs merge=lfs -text

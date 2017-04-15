@@ -1,0 +1,54 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{6}{c}}
+\hline  
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}&\multicolumn{1}{c}{(5)}&\multicolumn{1}{c}{(6)}\\
+                    &\multicolumn{1}{c}{IV}&\multicolumn{1}{c}{IV}&\multicolumn{1}{c}{IV}&\multicolumn{1}{c}{OLS}&\multicolumn{1}{c}{OLS}&\multicolumn{1}{c}{OLS}\\
+\hline  
+Mismatch Verbal     &     -0.0007         &      0.0144\sym{*}  &      0.0140\sym{*}  &     -0.0018         &      0.0175\sym{***}&      0.0067         \\
+[1em]
+Mismatch Math       &      0.0005         &     -0.0011         &     -0.0165\sym{**} &      0.0042         &      0.0117\sym{**} &     -0.0177\sym{***}\\
+[1em]
+Mismatch Social     &      0.0162\sym{***}&      0.0157\sym{***}&      0.0071         &      0.0161\sym{***}&      0.0352\sym{***}&      0.0049         \\
+[1em]
+Mismatch Verbal $\times$ Occ Tenure&                     &     -0.0027\sym{**} &     -0.0043\sym{***}&                     &     -0.0035\sym{***}&     -0.0029\sym{***}\\
+[1em]
+Mismatch Math $\times$ Occ Tenure&                     &      0.0002         &      0.0016         &                     &     -0.0014\sym{**} &      0.0020\sym{**} \\
+[1em]
+Mismatch Social $\times$ Occ Tenure&                     &      0.0001         &     -0.0008         &                     &     -0.0031\sym{***}&     -0.0007         \\
+[1em]
+Cumul Mismatch Verbal&                     &                     &     -0.0165\sym{***}&                     &                     &     -0.0151\sym{***}\\
+[1em]
+Cumul Mismatch Math &                     &                     &     -0.0226\sym{***}&                     &                     &     -0.0247\sym{***}\\
+[1em]
+Cumul Mismatch Social&                     &                     &     -0.0085\sym{**} &                     &                     &     -0.0076\sym{*}  \\
+[1em]
+Verbal Ability      &      0.0743\sym{*}  &      0.0712\sym{*}  &      0.0168         &      0.1919\sym{***}&      0.1763\sym{***}&      0.0139         \\
+[1em]
+Math Ability        &      0.4766\sym{***}&      0.4804\sym{***}&      0.4339\sym{***}&      0.4890\sym{***}&      0.4975\sym{***}&      0.4095\sym{***}\\
+[1em]
+Social Ability      &      0.1787\sym{***}&      0.1781\sym{***}&      0.1079\sym{***}&      0.2921\sym{***}&      0.2923\sym{***}&      0.1319\sym{***}\\
+[1em]
+Verbal Ability $\times$ Occ Tenure&      0.0129\sym{***}&      0.0127\sym{**} &      0.0077         &     -0.0035         &     -0.0018         &      0.0075\sym{*}  \\
+[1em]
+Math Ability $\times$ Occ Tenure&     -0.0084\sym{*}  &     -0.0092\sym{*}  &     -0.0074         &     -0.0073\sym{**} &     -0.0093\sym{***}&     -0.0049         \\
+[1em]
+Social Ability $\times$ Occ Tenure&      0.0077\sym{**} &      0.0079\sym{**} &      0.0078\sym{**} &     -0.0081\sym{***}&     -0.0086\sym{***}&      0.0049\sym{**} \\
+[1em]
+Occ Reqs Verbal     &     -0.0649         &     -0.0680         &     -0.0596         &     -0.0990         &     -0.1264\sym{*}  &     -0.0066         \\
+[1em]
+Occ Reqs Math       &      0.3054\sym{***}&      0.3037\sym{***}&      0.1880\sym{**} &      0.4212\sym{***}&      0.4422\sym{***}&      0.1994\sym{***}\\
+[1em]
+Occ Reqs Social     &      0.1020\sym{***}&      0.1051\sym{***}&     -0.0863\sym{***}&      0.1716\sym{***}&      0.1755\sym{***}&     -0.0855\sym{***}\\
+[1em]
+Occ Reqs Verbal $\times$ Occ Tenure&      0.0122         &      0.0130         &      0.0048         &      0.0074         &      0.0134\sym{*}  &     -0.0094         \\
+[1em]
+Occ Reqs Math $\times$ Occ Tenure&      0.0030         &      0.0031         &      0.0079         &     -0.0071         &     -0.0125\sym{*}  &      0.0096         \\
+[1em]
+Occ Reqs Social $\times$ Occ Tenure&      0.0069\sym{*}  &      0.0060         &      0.0101\sym{**} &      0.0002         &     -0.0008         &      0.0126\sym{***}\\
+\hline  
+Observations        &       43588         &       43588         &       30617         &       43588         &       43588         &       30617         \\
+\(R^{2}\)           &       0.259         &       0.260         &       0.216         &       0.283         &       0.285         &       0.231         \\
+\hline  
+\end{tabular}
+}

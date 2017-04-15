@@ -1,0 +1,584 @@
+@charset "UTF-8";
+/* BEGIN CSS Reset - heavily based off Eric Meyer's CSS reset at http://meyerweb.com/eric/tools/css/reset/ */
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, font, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td {
+	margin:0; padding:0; border:0;	outline:0; font-size:100%; vertical-align:baseline; background:transparent;
+}
+body {
+	line-height:1;
+}
+ol, ul {
+	list-style:none;
+}
+blockquote, q {
+	quotes:none;
+}
+blockquote:before, blockquote:after, q:before, q:after {
+	content:'';
+	content:none;
+}
+:focus {
+	outline:0;
+}
+ins {
+	text-decoration:none;
+}
+del {
+	text-decoration:line-through;
+}
+/* tables still need 'cellspacing="0"' in the markup */
+table {
+	border-collapse:collapse;
+	border-spacing:0;
+}
+/* END CSS Reset */
+
+/* BEGIN generic structure, based on Dreamweaver's 2 and 3 column elastic layouts */
+#canvas { 
+	position:relative;
+	width:55.5em; /* make slightly wider than contents to account for borders */
+	margin:0px auto 15px auto;
+	text-align:left;
+} 
+#header {
+	position:relative;
+	width:55em;
+	margin:0 auto;
+	border:1px solid #99c;
+	border-bottom-width:0;
+}
+#topnav {
+	position:relative;
+	z-index:100;
+	margin-top:1px;
+	background:#006 url("/usa/_img/bkgTopNav.png") repeat-x bottom left;
+}
+#main {
+	position:relative;
+	width:55em;
+	margin:0 auto;
+	border:1px solid #99c;
+	border-top-width:0;
+	border-bottom:3px double #006;
+	background-color:#fff;
+}
+#sidebarBackground {
+	position:absolute;
+	top:0px;
+	left:0px;
+	bottom:0px;
+	z-index:10;
+	width:11.5em;
+	background-color: rgb(246,247,248);
+	border-right:1px solid rgb(153,153,204);
+}
+#sidebarBackgroundRt {
+	position:absolute;
+	top:0px;
+	right:0px;
+	bottom:0px;
+	z-index:11;
+	width:12em;
+	background-color: rgb(246,247,248);
+	border-left:1px solid rgb(153,153,204);
+}
+#canvas.oneCol #sidebarBackground, #canvas.oneCol #sidebarBackgroundRt {
+	display:none;
+}
+#sidenav {
+	position:relative;
+	float:left; 
+	z-index:20;
+	width:11.5em;
+	padding:0 0 1em 0;
+	margin-top:-1px;
+}
+#canvas.oneCol #sidenav {
+	display:none;
+}
+#mainContent {
+	width:30em;
+	float:left;
+	margin:0 1em;
+}
+#canvas.oneCol #mainContent {
+	width:53em;
+}
+#canvas.twoCol #mainContent {
+	width:41em;
+} 
+#canvas.thrCol #mainContent {
+	width:29.5em;
+} 
+#sidebar {
+	position:relative;
+	float:left; 
+	width:12em;
+	z-index:21;
+	padding:0 0 12px 0;
+	margin-top:-1px;
+}
+#canvas.oneCol #sidebar, #canvas.twoCol #sidebar, #canvas.twoCol #sidebarBackgroundRt {
+	display:none;
+}
+#footer { 
+	padding-top:8px;
+	font-size: 0.8em;
+	color:#666;
+	font-family:"Trebuchet MS", Tahoma, Arial, Helvetica, sans-serif;
+	text-align:center;
+} 
+br.clearfloat {
+	clear:both;
+	height:0;
+	font-size:1px;
+	line-height:0px;
+}
+/* END generic structure */
+
+/* BEGIN Levin Alexander's graphic headers image replacement */
+/* Levin Alexander's graphic headers image replacement markup from
+	http://levinalex.net/files/20030809/alternatefir.html
+
+	Note, non-standard markup to support IE5/Mac is omitted.
+	Note, z-index to support Opera 5 and 6 is omitted.
+
+	See Also:
+	http://www.mezzoblue.com/archives/2003/12/12/accessible_i/#c002804
+*/
+.replace {
+	position:relative;
+	margin:0;
+	padding:0;
+}
+.replace span {
+	display: block;
+	position:absolute;
+	top:0px;
+	left:0px;
+}
+/* To use, add the following css:
+	#myh1, #myh1 span { height:XXXpx; width:XXXpx; background-image: url(XXX); }
+	
+	where myh1 is id of element being replaced declared as such:
+	
+	<tag class="replace" id="myh1">Text to be replaced.<span></span></tag>
+*/
+/* END Levin Alexander's graphic headers image replacement */
+
+/* BEGIN General XHTML styles */
+body  {
+	font-family:"Trebuchet MS", Tahoma, Arial Narrow, Arial, sans-serif;
+	background:#f0f5f9;
+	text-align:center;
+}
+hr {
+	border:0;
+	width:90%;
+	height:1px;
+	color:#006;
+	background-color:#006;
+}
+p, blockquote {
+	margin-bottom:1.5em;
+	font-size:0.8em;
+	line-height:1.5em;	
+}
+pre {
+	font-family:monospace;
+}
+blockquote {
+	margin:0 2.5em 1.5em 2.5em;
+}
+blockquote p, blockquote blockquote, blockquote h6, blockquote ol,
+blockquote table th, blockquote table td, blockquote pre,
+table ul,
+td td,
+ul ul, ul p, ul blockquote, ul ol, ul dl,
+ol ol, ol ul, ol dl, ol blockquote,
+li p, li td, li th,
+dl dl, dl p, dl ul,
+dd blockquote, blockquote dl, blockquote ul
+{
+	font-size:100%;
+}
+ol ol {
+	list-style-type: lower-alpha;
+	margin-top:0.5em;
+}
+ol ol ol {
+	list-style-type: lower-roman;
+}
+ol h6 {
+	font-size:1.05em;
+	font-weight:bold;
+	margin-top:1em;
+	margin-left:-4em;
+}
+code {
+	font-family: 'Courier New', Courier, mono;
+	font-size:1.1em;
+}
+sup {
+	font-size: 0.5em;
+	vertical-align: super;
+}
+sub {
+	font-size: 0.5em;
+	vertical-align: sub;
+}
+h1 {
+	font-size: 1.3em;
+	line-height: 1.4em;
+	margin: 1em 0;
+}
+h2 {
+	margin-top:2em;
+	margin-bottom:0.5em;
+	padding:0.2em;
+	font-size:1em;
+	background-color:#f0f5f9;
+}
+h3 {
+	margin:2em auto 1em auto;
+	text-align:center;
+	font-size:0.9em;
+	font-weight:bold;
+}
+h4 {
+	margin-bottom:1em;
+	font-size:0.9em;
+	font-weight:bold;
+	line-height:1.1em;
+}
+h5 {
+	margin-left:auto;
+	margin-right:auto;
+	text-align:center;
+	font-size:0.8em;
+	font-weight:bold;
+	line-height:1.5em;
+}
+h6 {
+	font-size:0.8em;
+	font-weight:bold;
+	line-height:1.5em;
+}
+a, a:link {
+	color:#006;
+}
+a:visited {
+	color:#60A3E1;
+}
+a:hover {
+	color:#999;
+}
+a:active {
+	color:#f99;
+}
+a img {
+	border-width:1px;
+	border-style:solid;
+}
+a img.noborder {
+	border:none;
+}
+ul {
+	margin-bottom:1.5em;
+	padding-left:4em;
+	list-style:disc;
+	font-size:0.8em;
+	line-height:1.5em;
+}
+ol {
+	margin-bottom:1em;
+	padding-left:4em;
+	list-style:decimal;
+	font-size:0.8em;
+	line-height:1.5em;
+}
+dl {
+	margin-bottom:1.5em;
+	/*padding-left:2em;*/
+	font-size:0.8em;
+	line-height:1.5em;
+}
+dt {
+	font-weight:bold;
+	/*background-color:#f0f5f9;*/
+}
+dd {
+	margin-left:2em;
+	margin-bottom:1em;
+	/*background-color:#f0f5f9;*/
+}
+dl.codes {
+	padding-left:1em;
+}
+dl.codes dt, dl.codes dd {
+	float:left;
+	margin: 0; padding: 0;
+	background-color:transparent;
+}
+dl.codes dt {
+	clear:both;
+	margin-right:1.5em;
+}
+dl.codes dd {
+	width:90%;
+}
+dl.subtleList dt {
+	font-weight:normal;
+}
+dl.spaced dd {
+	margin-bottom:1em;
+}
+dl.spaced dl dd {
+	margin-bottom:0em;
+}
+table, table.container table {
+	width:90%;
+	margin:1em auto;
+	border:2px solid #006;
+	border-collapse:collapse;
+	caption-side:top;
+	empty-cells:show;
+}
+table.container table {
+	width:auto;
+}
+caption {
+	padding-bottom:0.2em;
+	margin:0 auto;
+}
+tr:hover, table.container table tr:hover {
+	background-color:#eee;
+}
+tr.odd {
+	background-color:#f6f7f8;
+}
+th, table.container table th {
+	background-color:#979bc8;
+}
+th a:visited {
+	color:#336;
+}
+th, td, table.container table th, table.container table td {
+	padding:0.2em;
+	border:2px solid #006;
+	font-weight: normal;
+	vertical-align: middle;
+	text-align: center;
+	font-size:0.8em;
+	line-height:1.5em;
+}
+table.container th, table.container td {
+	padding:0em;
+	font-size:1em;
+}
+table.semiSubtleTable {
+	border:none;
+}
+table.semiSubtleTable th, table.semiSubtleTable td {
+	border-left:1px solid rgb(153,153,204);
+	border-top:none;
+	border-right:none;
+	border-bottom:none;
+	vertical-align:top;
+	padding-left:0.5em;
+}
+table.leftAlign th, table.leftAlign td {
+	text-align:left;
+}
+table.rightAlign td {
+	text-align:right;
+}
+table.leftAlign tr.centerAlign th, table.leftAlign tr.centerAlign td {
+	text-align:center;
+}
+table.bottomAlign td, table.bottomAlign th,
+table tr.bottomAlign td, table tr.bottomAlign th {
+	vertical-align:bottom;
+}
+table.topAlign td, table.topAlign th,
+table tr.topAlign td, table tr.topAlign th {
+	vertical-align:top;
+}
+table.semiSubtleTable th:first-child, table.semiSubtleTable td:first-child {
+	border-left:none;
+	}
+table.semiSubtleTable td, table.semiSubtleTable th[scope=row] {
+	border-top:1px solid rgb(153,153,204);
+}
+table.subtleTable {
+	border:none;
+}
+table.subtleTable th, table.subtleTable td {
+	border:none;
+	vertical-align:top;
+	text-align:left;
+}
+table.container {
+	border:none;
+}
+table.container th, table.container td {
+	border:none;
+}
+table.container tr:hover, table.nohover tr:hover{
+	background-color:transparent;
+}
+td.indent1 {
+	padding-left:1em;
+}
+td.indent2 {
+	padding-left:2em;
+}
+td.indent3 {
+	padding-left:3em;
+}
+td.indent4 {
+	padding-left:4em;
+}
+hr.tableDivider {
+	border-bottom:2px dashed #006;
+	width:100%;
+	color:transparent;
+	background:transparent;
+}
+.tight {
+	margin-top:0px;
+	margin-bottom:0px;
+}
+.outdent {
+	text-indent:-2.5em;
+	margin-left:2.5em;
+}
+ul.spaced li, ol.spaced li {
+	margin-bottom:1em;
+}
+.spaced li li {
+	margin-bottom:0em;
+}
+.alert, .alert a {
+	color:#c00;
+}
+.footnote {
+	font-size: 0.5em;
+	vertical-align: super;
+}
+a.footnote {
+	text-decoration:none;
+}
+a.footnote:hover {
+	text-decoration:underline;
+}
+/* END General XHTML styles */
+
+/* BEGIN specific element position and layout */
+#MPCLink {
+	position:absolute;
+	z-index:100;
+	left:0;
+	top:0;
+	width:100%;
+}
+#MPCLink a {
+	position:absolute;
+	top:0px;
+	right:0px;
+	left:0px;
+	padding-left:10px;
+	font-size:0.6em;
+	line-height:1.5em;
+	color:rgb(127,127,178);	/* IE 8 doesn't know rgba */
+	border-bottom:1px solid rgb(133,133,183);	/* IE 8 doesn't know rgba */
+	color: rgba(0,0,102,0.5);
+	border-bottom:1px solid rgba(153,153,204,0.3);
+	background-color:rgba(249,249,251,0.05);
+	text-decoration:none;
+}
+#MPCLink a:hover {
+	color: rgba(0,0,102,1);
+	border-bottom:1px solid rgba(153,153,204,1);
+	background-color:rgba(249,249,251,0.5);
+}
+/* Levin Alexander's graphic headers image replacement for the title */
+#title, #title span {
+	width:100%;
+	height:84px;
+	background: #99c url("/usa/_img/logo.jpg") no-repeat;
+	overflow:hidden; /* for very large font sizes, this will cut off title text rather than letting it overlap the content below */
+}
+#header h1 {
+	font-size:3em;
+	line-height:1.6em;
+}
+#header ul, #sidenav ul {
+	margin-bottom:0;
+	padding-left:0;
+	list-style:none;
+}
+#topnav ul {
+	margin-left:245px; /* did this rather than centering to handle offsize user preferred fonts */
+	padding-bottom:7px;	/* space to show bottom of background image */
+	font-size:1em;
+	font-weight:bold;
+}
+#topnav ul li {
+	display:inline;
+	list-style-type:none;
+	padding:0 0.5em;
+}
+#topnav ul li.lastItem {
+	margin-left:110px;
+}
+#topnav a {
+	color:#dedfeb;
+	text-decoration:none;
+}
+#topnav a:hover {
+	text-decoration:underline;
+}
+ul.menu li {
+	display:inline;
+	padding:1em;
+}
+/*side nav */
+/* right sidebar (mainly on home page) */
+#sidenav h2, #sidebar h2{
+	margin:0;
+	padding-left:16px;
+	border-top: 1px solid rgb(153,153,204);
+	border-bottom: 1px solid rgb(153,153,204);
+	background:#fff url("/usa/_img/arrow.gif") no-repeat -2px 7px;
+	font-size: 0.75em;
+	font-weight:bold;
+	line-height: 1.6em;
+	text-transform:uppercase;
+}
+#sidenav ul, #sidebar ul {
+	margin:0.3em 0 1.4em 0.6em;
+	padding-left:0;
+	list-style: none;
+	font-size: 0.8em;
+	line-height: 1.25em;
+}
+#sidenav li, #sidebar li {
+	margin-bottom: 0.2em;
+}
+#sidenav a, #sidenav a:link, #sidebar a, #sidebar a:link { text-decoration: none; }
+#sidenav a:visited, #sidebar a:visited { color: #006; }
+#sidenav a:hover, #sidebar a:hover {
+	color: #999;
+	text-decoration: underline;
+}
+#sidenav a:active, #sidebar a:active { color: #f99; }
+#funding {
+	width:531px;
+	margin:0 auto;
+	text-align:center;
+}
+#footer a { text-decoration:none; }
+#footer a, #footer a:link { color:#666; }
+#footer a:visited { color:#99c; }
+#footer a:focus, #footer a:hover { color:#ccc; }
+/* END specific element position and layout */
