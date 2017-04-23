@@ -6,6 +6,19 @@
 * description: this code is for the project 'occupation skill mismatch'
 --------------------------------------------------------------------------------------*/
 
+
+************************************************************
+* Read in job finding rate from Shimer (2012)
+
+
+import delimited ${download}/find-prob.dat, clear
+rename v1 year
+rename v2 fnd_rate
+
+collapse fnd_rate, by(year)
+
+save ${download}/fnd_rate.dta
+
 global diminitls "vms"
 global varcor    "cid" /* may be cluster,id or rbst*/
 global varmeth   "asymp"/* how to compute variance, may be boot or asymp */
@@ -981,6 +994,10 @@ save ${result}/yearly_03.dta, replace
 merge m:1 year using ${download}/unrate.dta, gen(_merge_unrate)
 drop if _merge_unrate ==2
 
+merge m:1 year using ${download}/fnd_rate.dta, gen(_merge_fndrate)
+drop if _merge_fndrate ==2
+
+
 reg mm i.age $zlist_0
 predict mm_ageres, residual
 
@@ -999,11 +1016,16 @@ restore
 reg mm unrate year i.age $zlist_0
 gen rec = unrate >=7
 
+replace fnd_rate = fnd_rate*100
+reg mm fnd_rate year i.age $zlist_0
+
+
+
 reg mm year i.age $zlist_0
 predict mm_yrageres, residual
 
 preserve 
-collapse mm_yrageres mm unrate, by(year)
+collapse mm_yrageres mm unrate fnd_rate, by(year)
 
 twoway (scatter mm_yrageres year, yaxis(1) ) (lpoly mm_yrageres year, kernel(rec) bwidth(2) yaxis(1) lwidth(thick)) ///
 (line unrate year, yaxis(2) lwidth(thick)) , ///
@@ -1016,7 +1038,20 @@ saving(${result}/mm_${diminitls}_ageres_unrate_year, replace)
 graph export ${result}/mm_${diminitls}_yrageres_unrate_year.eps, replace 
 *graph export ${result}/mm_${diminitls}_yrageres_unrate_year.png, replace 
 
+twoway (scatter mm_yrageres year, yaxis(1) ) (lpoly mm_yrageres year, kernel(rec) bwidth(2) yaxis(1) lwidth(thick)) ///
+(line fnd_rate year, yaxis(2) lwidth(thick)) , ///
+ytitle("Mismatch Residual", size(medlarge) axis(1)) ytitle("Job Finding Rate", size(medlarge) axis(2)) ///
+ xtitle("Year", size(medlarge)) ///
+graphregion(color(white)) xlabel(, grid gstyle(dot)) ylabel(, grid gstyle(dot)) ///
+legend(lab(1 "Residual mismatch") lab(2 "Moving-average of mismatch") lab(3 "Finding Rate") ///
+ ring(0) position(6) rows(3) ) ///
+saving(${result}/mm_${diminitls}_ageres_fndrate_year, replace)
+graph export ${result}/mm_${diminitls}_yrageres_fndrate_year.eps, replace 
+*graph export ${result}/mm_${diminitls}_yrageres_unrate_year.png, replace 
+
 restore
+
+xtset id year
 
 gen urt0 = unrate if exp==1
 by id: egen unrate_exp1 = mean(urt0)
@@ -1040,11 +1075,55 @@ estimate store mm_urtexp5
 reg mm unrate_exp1 unrate_exp5 unrate_exp10 $zlist i.age 
 estimate store mm_urtexp10
 
-esttab mm_urtexp1 mm_urtexp5 mm_urtexp10 ///
+reg mm unrate_exp1 $zlist i.age if exp>10
+estimate store mm_exp10_urtexp1
+reg mm unrate_exp1 unrate_exp5 $zlist i.age if exp>10
+estimate store mm_exp10_urtexp5
+reg mm unrate_exp1 unrate_exp5 unrate_exp10 $zlist i.age if exp>10
+estimate store mm_exp10_urtexp10
+
+esttab mm_urtexp1 mm_urtexp5 mm_urtexp10  mm_exp10_urtexp1 mm_exp10_urtexp5 mm_exp10_urtexp10  ///
                    using ${result}/table_mm_urtexp.tex, b(4) ///
                    nodepvars gaps not label nonotes substitute(\hline\hline \hline \hline "\hline  " "Standard" "${labtxt} standard" ///
                    "\sym{\sym{\dagger}}" "$^{\dagger}$" "\sym{\sym{*}}" "$^{*}$" "\sym{\sym{**}}" "$^{**}$" "\sym{\sym{***}}" "$^{***}$") ///
 		   drop( *age* $zlist _cons) ///
 		           star(\sym{*} 0.10 \sym{**} 0.05 \sym{***} 0.01) replace
 	
+*do it with the initial finding rate
+
+gen frt0 = fnd_rate if exp==1
+by id: egen fndrate_exp1 = mean(frt0)
+label var fndrate_exp1 "Find Rt, experience 1"
+drop frt0
+
+gen frt0 = fnd_rate if exp>=2 & exp<=5
+by id: egen fndrate_exp5 = mean(frt0)
+label var fndrate_exp5 "Find Rt, experience 2-5"
+drop frt0
+
+gen frt0 = fnd_rate if exp>=6 & exp<=10
+by id: egen fndrate_exp10 = mean(frt0)
+label var fndrate_exp10 "Find Rt, experience 6-10"
+drop frt0
+
+reg mm fndrate_exp1 $zlist i.age 
+estimate store mm_frtexp1
+reg mm fndrate_exp1 fndrate_exp5  $zlist i.age 
+estimate store mm_frtexp5
+reg mm fndrate_exp1 fndrate_exp5 fndrate_exp10 $zlist i.age 
+estimate store mm_frtexp10
+
+reg mm fndrate_exp1 $zlist i.age if exp>10
+estimate store mm_exp10_frtexp1
+reg mm fndrate_exp1 fndrate_exp5 $zlist i.age if exp>10
+estimate store mm_exp10_frtexp5
+reg mm fndrate_exp1 fndrate_exp5 fndrate_exp10 $zlist i.age if exp>10
+estimate store mm_exp10_frtexp10
+
+esttab mm_frtexp1 mm_frtexp5 mm_frtexp10  mm_exp10_frtexp1 mm_exp10_frtexp5 mm_exp10_frtexp10  ///
+                   using ${result}/table_mm_frtexp.tex, b(4) ///
+                   nodepvars gaps not label nonotes substitute(\hline\hline \hline \hline "\hline  " "Standard" "${labtxt} standard" ///
+                   "\sym{\sym{\dagger}}" "$^{\dagger}$" "\sym{\sym{*}}" "$^{*}$" "\sym{\sym{**}}" "$^{**}$" "\sym{\sym{***}}" "$^{***}$") ///
+		   drop( *age* $zlist _cons) ///
+		           star(\sym{*} 0.10 \sym{**} 0.05 \sym{***} 0.01) replace
 
