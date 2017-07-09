@@ -934,6 +934,8 @@ forvalues iter=1/50{
 	}
 	drop *_R uhat
 }
+xi: reg lwage mm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d, vce(robust)
+estimate save ${result}/ols_mm_means_rbst.ster, replace
 
 
 global xlist  ability_mean_ten_occ skill_mean_ten_occ $xlist_0
@@ -969,6 +971,8 @@ forvalues iter=1/50{
 	}
 	drop *_R uhat
 }
+xi: ivregress 2sls lwage mm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d, vce(robust)
+estimate save ${result}/iv_mm_means.ster_rbst, replace
 
 
 /*------------------------------------------------------------------------------------*/
@@ -1006,6 +1010,9 @@ forvalues iter=1/50{
 	}
 	drop *_R uhat
 }
+xi: reg lwage mm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d, vce(robust) 
+estimate save ${result}/ols_mm_ten_means_rbst.ster, replace
+
 
 global xlist  mm_ten_occ ability_mean_ten_occ skill_mean_ten_occ $xlist_0
 global ivlist mm_ten_occ_iv ability_mean_ten_occ_iv skill_mean_ten_occ_iv $ivlist_0
@@ -1040,6 +1047,8 @@ forvalues iter=1/50{
 	}
 	drop *_R uhat
 }
+xi: ivregress 2sls lwage mm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d, vce(robust)
+estimate save ${result}/iv_mm_ten_means_rbst.ster, replace
 
 /*------------------------------------------------------------------------------------*/
 /* cumulative mismatch */
@@ -1075,6 +1084,8 @@ forvalues iter=1/50{
 	}
 	drop *_R uhat
 }
+xi: reg lwage mm cmm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d, vce(robust)
+estimate save ${result}/ols_cmm_mm_means_rbst.ster, replace
 
 
 global xlist  mm_ten_occ ability_mean_ten_occ skill_mean_ten_occ $xlist_0
@@ -1110,6 +1121,8 @@ forvalues iter=1/50{
 	}
 	drop *_R uhat
 }
+xi: ivregress 2sls lwage mm cmm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d, vce(robust)
+estimate save ${result}/iv_cmm_mm_means_rbst.ster, replace
 
 /*------------------------------------------------------------------------------------*/
 /* mismatch with positive & negative components */
@@ -1145,6 +1158,8 @@ forvalues iter=1/50{
 	}
 	drop *_R uhat
 }
+xi: reg lwage mm_pos mm_neg $xlist $zlist i.ind_1d i.occ_1d, vce(robust)
+estimate save ${result}/ols_mm_means_pos_neg_rbst.ster, replace
 
 
 global xlist  $xlist_0
@@ -1179,6 +1194,8 @@ forvalues iter=1/50{
 	}
 	drop *_R uhat
 }
+xi: ivregress 2sls lwage mm_pos mm_neg ($xlist = $ivlist) $zlist i.ind_1d i.occ_1d, vce(robust)
+estimate save ${result}/iv_mm_means_pos_neg_rbst.ster, replace
 
 
 /*------------------------------------------------------------------------------------*/
@@ -1215,6 +1232,8 @@ forvalues iter=1/50{
 	}
 	drop *_R uhat
 }
+xi: reg lwage mm_pos mm_neg $xlist $zlist i.ind_1d i.occ_1d, vce(robust)
+estimate save ${result}/ols_mm_ten_means_pos_neg_rbst.ster, replace
 
 
 global xlist  mm_pos_ten_occ mm_neg_ten_occ $xlist_0
@@ -1249,6 +1268,9 @@ forvalues iter=1/50{
 	}
 	drop *_R uhat
 }
+xi: ivregress 2sls lwage mm_pos mm_neg ($xlist = $ivlist) $zlist i.ind_1d i.occ_1d, vce(robust)
+estimate save ${result}/iv_mm_ten_means_pos_neg_rbst.ster, replace
+
 
 /*------------------------------------------------------------------------------------*/
 /* cumulative mismatch with positive & negative components */
@@ -1284,6 +1306,8 @@ forvalues iter=1/50{
 	}
 	drop *_R uhat
 }
+xi: reg lwage mm_pos mm_neg cmm_pos cmm_neg $xlist $zlist i.ind_1d i.occ_1d, vce(robust)
+estimate save ${result}/ols_cmm_mm_means_pos_neg_rbst.ster, replace
 
 
 global xlist  mm_pos_ten_occ mm_neg_ten_occ $xlist_0
@@ -1318,6 +1342,9 @@ forvalues iter=1/50{
 	}
 	drop *_R uhat
 }
+xi: ivregress 2sls lwage mm_pos mm_neg cmm_pos cmm_neg ($xlist = $ivlist) $zlist i.ind_1d i.occ_1d, vce(robust)
+estimate save ${result}/iv_cmm_mm_means_pos_neg_rbst.ster, replace
+
 
 /*------------------------------------------------------------------------------------*/
 /* individual component mismatch */
@@ -1353,6 +1380,9 @@ forvalues iter=1/50{
 	}
 	drop *_R uhat
 }
+xi: reg lwage absmm_?? $xlist $zlist ability_?? skill_?? i.ind_1d i.occ_1d , vce(robust)
+estimate save ${result}/ols_ind_mm_means_rbst.ster, replace
+
 
 global xlist  ability_??_ten_occ skill_??_ten_occ $xlist_0
 global ivlist ability_??_ten_occ_iv skill_??_ten_occ_iv $ivlist_0
@@ -1386,6 +1416,9 @@ forvalues iter=1/50{
 	}
 	drop *_R uhat
 }
+xi: ivregress 2sls lwage absmm_?? ($xlist = $ivlist) $zlist ability_?? skill_?? i.ind_1d i.occ_1d , vce(robust)
+estimate save ${result}/iv_ind_mm_means_rbst.ster, replace
+
 
 /*------------------------------------------------------------------------------------*/
 /* individual component mismatch with tenure */
@@ -1421,6 +1454,8 @@ forvalues iter=1/50{
 	}
 	drop *_R uhat
 }
+xi: reg lwage absmm_?? $xlist $zlist ability_?? skill_?? i.ind_1d i.occ_1d, vce(robust)
+estimate save ${result}/ols_ind_mm_ten_means_rbst.ster, replace
 
 
 global xlist  absmm_??_ten_occ ability_??_ten_occ skill_??_ten_occ $xlist_0
@@ -1455,6 +1490,9 @@ forvalues iter=1/50{
 	}
 	drop *_R uhat
 }
+xi: ivregress 2sls lwage absmm_?? ($xlist = $ivlist) $zlist ability_?? skill_?? i.ind_1d i.occ_1d , vce(robust)
+estimate save ${result}/iv_ind_mm_ten_means_rbst.ster, replace
+
 
 /*------------------------------------------------------------------------------------*/
 /* individual component cumulative mismatch */
@@ -1490,6 +1528,9 @@ forvalues iter=1/50{
 	}
 	drop *_R uhat
 }
+xi: reg lwage cmm_aa cmm_bb cmm_cc absmm_?? $xlist $zlist ability_?? skill_?? i.ind_1d i.occ_1d , vce(robust)
+estimate save ${result}/ols_ind_cmm_mm_means_rbst.ster, replace
+
 
 global xlist  absmm_??_ten_occ ability_??_ten_occ skill_??_ten_occ $xlist_0 
 global ivlist absmm_??_ten_occ_iv ability_??_ten_occ_iv skill_??_ten_occ_iv $ivlist_0
@@ -1523,6 +1564,9 @@ forvalues iter=1/50{
 	}
 	drop *_R uhat
 }
+xi: ivregress 2sls lwage cmm_aa cmm_bb cmm_cc absmm_?? ($xlist = $ivlist) $zlist ability_?? skill_?? i.ind_1d i.occ_1d , vce(robust)
+estimate save ${result}/iv_ind_cmm_mm_means_rbst.ster, replace
+
 
 /*------------------------------------------------------------------------------------*/
 /*------------------------------------------------------------------------------------*/
