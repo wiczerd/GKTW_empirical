@@ -972,7 +972,7 @@ forvalues iter=1/50{
 	drop *_R uhat
 }
 xi: ivregress 2sls lwage mm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d, vce(robust)
-estimate save ${result}/iv_mm_means.ster_rbst, replace
+estimate save ${result}/iv_mm_means_rbst.ster, replace
 
 
 /*------------------------------------------------------------------------------------*/
@@ -1615,6 +1615,24 @@ esttab iv_mm_means iv_mm_ten_means iv_cmm_mm_means ols_mm_means ols_mm_ten_means
 		   order(mm mm_ten_occ cmm ability_mean ability_mean_ten_occ skill_mean skill_mean_ten_occ ten* exp* oj $zlist _cons) ///
                    star(\sym{\dagger} 0.10 \sym{*} 0.05 \sym{**} 0.01) replace
   
+/* comparison to robust*/
+
+estimate use ${result}/iv_mm_means_rbst.ster
+estimate store iv_mm_means_rbst
+estimate use ${result}/iv_mm_ten_means_rbst.ster
+estimate store iv_mm_ten_means_rbst
+estimate use ${result}/iv_cmm_mm_means_rbst.ster
+estimate store iv_cmm_mm_means_rbst
+
+esttab iv_mm_means iv_mm_ten_means iv_cmm_mm_means iv_mm_means_rbst iv_mm_ten_means_rbst iv_cmm_mm_means_rbst ///
+			   using ${result}/table_ivgls_${diminitls}.tex, b(4) ///
+			   r2 nodepvars gaps not label nonotes substitute(\hline\hline \hline \hline "\hline  " "Standard" "Robust standard" ///
+			   "\sym{\sym{\dagger}}" "$^{\dagger}$" "\sym{\sym{*}}" "$^{*}$" "\sym{\sym{**}}" "$^{**}$") ///
+	   drop(_I* ten* exp* oj $zlist _cons) ///
+	   mtitles("IV-GLS" "IV-GLS" "IV-GLS" "IV-RBST" "IV-RBST" "IV-RBST") ///
+	   order(mm mm_ten_occ cmm ability_mean ability_mean_ten_occ skill_mean skill_mean_ten_occ) ///
+			   star(\sym{\dagger} 0.10 \sym{*} 0.05 \sym{**} 0.01) replace
+
 /*------------------------------------------------------------------------------------*/
 /* individual component mismatch */
 
@@ -1654,3 +1672,81 @@ esttab iv_ind_mm_means iv_ind_mm_ten_means iv_ind_cmm_mm_means ols_ind_mm_means 
 		   title("Wage Regression with Mismatch by Components (Full Results)") ///
 		   order(absmm_aa absmm_bb absmm_cc absmm_aa_t* absmm_bb_t* absmm_cc_t* cmm_aa cmm_bb cmm_cc ability_?? ability_??_* skill_?? skill_??_* ten* exp* oj $zlist _cons) ///
                    star(\sym{\dagger} 0.10 \sym{*} 0.05 \sym{**} 0.01) replace
+
+
+estimate use ${result}/iv_ind_mm_means_rbst.ster
+estimate store iv_ind_mm_means_rbst
+estimate use ${result}/iv_ind_mm_ten_means_rbst.ster
+estimate store iv_ind_mm_ten_means_rbst
+estimate use ${result}/iv_ind_cmm_mm_means_rbst.ster
+estimate store iv_ind_cmm_mm_means_rbst
+
+/* comparison to robust */
+esttab iv_ind_mm_means iv_ind_mm_ten_means iv_ind_cmm_mm_means iv_ind_mm_means_rbst iv_ind_mm_ten_means_rbst iv_ind_cmm_mm_means_rbst  ///
+                   using ${result}/table_ivgls_${diminitls}_ind.tex, b(4) ///
+                   r2 nodepvars gaps label not nonotes substitute(\hline\hline \hline \hline "\hline  " "Standard" "Robust standard" ///
+                   "\sym{\sym{\dagger}}" "$^{\dagger}$" "\sym{\sym{*}}" "$^{*}$" "\sym{\sym{**}}" "$^{**}$") ///
+		   drop(_I* ten* exp* oj $zlist _cons) ///
+		   mtitles("IV-GLS" "IV-GLS" "IV-GLS" "IV-RBST" "IV-RBST" "IV-RBST") ///
+		   order(absmm_aa absmm_bb absmm_cc absmm_aa_t* absmm_bb_t* absmm_cc_t* cmm_aa cmm_bb cmm_cc ability_?? ability_??_* skill_?? skill_??_*) ///
+                   star(\sym{\dagger} 0.10 \sym{*} 0.05 \sym{**} 0.01) replace
+				   
+				   
+/*------------------------------------------------------------------------------------*/
+/* positive-negative mismatch */
+
+estimate clear
+estimate use ${result}/ols_mm_means_pos_neg.ster
+estimate store ols_mm_means_pos_neg
+estimate use ${result}/ols_mm_ten_means_pos_neg.ster
+estimate store ols_mm_ten_means_pos_neg
+estimate use ${result}/ols_cmm_mm_means_pos_neg.ster
+estimate store ols_cmm_mm_means_pos_neg
+
+estimate use ${result}/iv_mm_means_pos_neg.ster
+estimate store iv_mm_means_pos_neg
+estimate use ${result}/iv_mm_ten_means_pos_neg.ster
+estimate store iv_mm_ten_means_pos_neg
+estimate use ${result}/iv_cmm_mm_means_pos_neg.ster
+estimate store iv_cmm_mm_means_pos_neg
+
+/* tex */
+esttab iv_mm_means_pos_neg iv_mm_ten_means_pos_neg iv_cmm_mm_means_pos_neg ols_mm_means_pos_neg_pos_neg ols_mm_ten_means_pos_neg ols_cmm_mm_means ///
+                   using ${result}/table_${diminitls}_pos_neg.tex, b(4) ///
+                   r2 nodepvars gaps label not nonotes substitute(\hline\hline \hline \hline "\hline  " "Standard" "Robust standard" ///
+                   "\sym{\sym{\dagger}}" "$^{\dagger}$" "\sym{\sym{*}}" "$^{*}$" "\sym{\sym{**}}" "$^{**}$") ///
+		   drop(_I* ten* exp* oj $zlist _cons) ///
+		   mtitles("IV" "IV" "IV" "OLS" "OLS" "OLS") ///
+		   order(mm_??? mm_???_ten_occ cmm_???) ///
+                   star(\sym{\dagger} 0.10 \sym{*} 0.05 \sym{**} 0.01) replace
+		   
+esttab iv_mm_means_pos_neg iv_mm_ten_means_pos_neg iv_cmm_mm_means_pos_neg ols_mm_means_pos_neg ols_mm_ten_means_pos_neg ols_cmm_mm_means_pos_neg ///
+                   using ${result}/table_apx_${diminitls}_pos_neg.tex, b(4) se(4) ///
+                   r2 nodepvars nogaps label longtable substitute(\hline\hline \hline \hline "\hline  " ///
+		   "Standard errors in parentheses" "All regressions include occupation and industry dummies." ///
+		   "\sym{\sym{\dagger}} \(p<0.10\), \sym{\sym{*}} \(p<0.05\), \sym{\sym{**}} \(p<0.01\)" "Robust standard errors in parentheses. \sym{\sym{\dagger}} \(p<0.10\), \sym{\sym{*}} \(p<0.05\), \sym{\sym{**}} \(p<0.01\)." ///
+                   "\sym{\sym{\dagger}}" "$^{\dagger}$" "\sym{\sym{*}}" "$^{*}$" "\sym{\sym{**}}" "$^{**}$") ///
+		   drop(_I*) ///
+		   mtitles("IV" "IV" "IV" "OLS" "OLS" "OLS") ///
+		   title("Wage Regression with Mismatch by Components (Full Results)") ///
+		   order(mm_??? mm_???_ten_occ cmm_??? ten* exp* oj $zlist _cons) ///
+                   star(\sym{\dagger} 0.10 \sym{*} 0.05 \sym{**} 0.01) replace
+
+
+estimate use ${result}/iv_mm_means_pos_neg_rbst.ster
+estimate store iv_mm_pos_neg_rbst
+estimate use ${result}/iv_mm_ten_means_pos_neg_rbst.ster
+estimate store iv_mm_ten_pos_neg_rbst
+estimate use ${result}/iv_cmm_mm_means_pos_neg_rbst.ster
+estimate store iv_cmm_mm_pos_neg_rbst
+
+/* comparison to robust */
+esttab iv_mm_means_pos_neg iv_mm_ten_means_pos_neg iv_cmm_mm_means_pos_neg iv_mm_pos_neg_rbst iv_mm_ten_pos_neg_rbst iv_cmm_mm_pos_neg_rbst  ///
+                   using ${result}/table_ivgls_${diminitls}_pos_neg.tex, b(4) ///
+                   r2 nodepvars gaps label not nonotes substitute(\hline\hline \hline \hline "\hline  " "Standard" "Robust standard" ///
+                   "\sym{\sym{\dagger}}" "$^{\dagger}$" "\sym{\sym{*}}" "$^{*}$" "\sym{\sym{**}}" "$^{**}$") ///
+		   drop(_I* ten* exp* oj $zlist _cons) ///
+		   mtitles("IV-GLS" "IV-GLS" "IV-GLS" "IV-RBST" "IV-RBST" "IV-RBST") ///
+		   order(mm_??? mm_???_ten_occ cmm_???) ///
+                   star(\sym{\dagger} 0.10 \sym{*} 0.05 \sym{**} 0.01) replace
+		   
