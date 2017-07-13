@@ -1032,3 +1032,4 @@ graph export ${result}/fe_mm.eps, replace
 
 xtset id year
 
+reg fe_benchmark mm if cmm<. & mm<5
