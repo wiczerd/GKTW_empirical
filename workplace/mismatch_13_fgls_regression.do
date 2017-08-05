@@ -1834,7 +1834,7 @@ esttab iv_mm_means iv_mm_ten_means iv_cmm_mm_means ols_mm_means ols_mm_ten_means
 		   drop(_I* ten* exp* oj $zlist _cons) ///
 		   mtitles("IV" "IV" "IV" "OLS" "OLS" "OLS") ///
 		   order(mm mm_ten_occ cmm ability_mean ability_mean_ten_occ skill_mean skill_mean_ten_occ) ///
-                   star(\sym{\dagger} 0.10 \sym{*} 0.05 \sym{**} 0.01) replace
+                   star(* 0.10 ** 0.05 *** 0.01) replace
 		   
 esttab iv_mm_means iv_mm_ten_means iv_cmm_mm_means ols_mm_means ols_mm_ten_means ols_cmm_mm_means ///
                    using ${result}/table_apx_${diminitls}.tex, b(4) se(4) ///
@@ -1846,7 +1846,7 @@ esttab iv_mm_means iv_mm_ten_means iv_cmm_mm_means ols_mm_means ols_mm_ten_means
 		   drop(_I*) ///
 		   mtitles("IV" "IV" "IV" "OLS" "OLS" "OLS") ///
 		   order(mm mm_ten_occ cmm ability_mean ability_mean_ten_occ skill_mean skill_mean_ten_occ ten* exp* oj $zlist _cons) ///
-                   star(\sym{\dagger} 0.10 \sym{*} 0.05 \sym{**} 0.01) replace
+                   star(* 0.10 ** 0.05 *** 0.01) replace
   
 /* comparison to robust*/
 
@@ -1864,7 +1864,7 @@ esttab iv_mm_means iv_mm_ten_means iv_cmm_mm_means iv_mm_means_rbst iv_mm_ten_me
 	   drop(_I* ten* exp* oj $zlist _cons) ///
 	   mtitles("IV-GLS" "IV-GLS" "IV-GLS" "IV-RBST" "IV-RBST" "IV-RBST") ///
 	   order(mm mm_ten_occ cmm ability_mean ability_mean_ten_occ skill_mean skill_mean_ten_occ) ///
-			   star(\sym{\dagger} 0.10 \sym{*} 0.05 \sym{**} 0.01) replace
+			   star(* 0.10 ** 0.05 *** 0.01) replace
 
 /*------------------------------------------------------------------------------------*/
 /* individual component mismatch */
@@ -1892,7 +1892,7 @@ esttab iv_ind_mm_means iv_ind_mm_ten_means iv_ind_cmm_mm_means ols_ind_mm_means 
 		   drop(_I* ten* exp* oj $zlist _cons) ///
 		   mtitles("IV" "IV" "IV" "OLS" "OLS" "OLS") ///
 		   order(absmm_aa absmm_bb absmm_cc absmm_aa_t* absmm_bb_t* absmm_cc_t* cmm_aa cmm_bb cmm_cc ability_?? ability_??_* skill_?? skill_??_*) ///
-                   star(\sym{\dagger} 0.10 \sym{*} 0.05 \sym{**} 0.01) replace
+                   star(* 0.10 ** 0.05 *** 0.01) replace
 		   
 esttab iv_ind_mm_means iv_ind_mm_ten_means iv_ind_cmm_mm_means ols_ind_mm_means ols_ind_mm_ten_means ols_ind_cmm_mm_means ///
                    using ${result}/table_apx_${diminitls}_ind.tex, b(4) se(4) ///
@@ -1904,7 +1904,7 @@ esttab iv_ind_mm_means iv_ind_mm_ten_means iv_ind_cmm_mm_means ols_ind_mm_means 
 		   mtitles("IV" "IV" "IV" "OLS" "OLS" "OLS") ///
 		   title("Wage Regression with Mismatch by Components (Full Results)") ///
 		   order(absmm_aa absmm_bb absmm_cc absmm_aa_t* absmm_bb_t* absmm_cc_t* cmm_aa cmm_bb cmm_cc ability_?? ability_??_* skill_?? skill_??_* ten* exp* oj $zlist _cons) ///
-                   star(\sym{\dagger} 0.10 \sym{*} 0.05 \sym{**} 0.01) replace
+                   star(* 0.10 ** 0.05 *** 0.01) replace
 
 
 estimate use ${result}/iv_ind_mm_means_rbst.ster
@@ -1922,7 +1922,7 @@ esttab iv_ind_mm_means iv_ind_mm_ten_means iv_ind_cmm_mm_means iv_ind_mm_means_r
 		   drop(_I* ten* exp* oj $zlist _cons) ///
 		   mtitles("IV-GLS" "IV-GLS" "IV-GLS" "IV-RBST" "IV-RBST" "IV-RBST") ///
 		   order(absmm_aa absmm_bb absmm_cc absmm_aa_t* absmm_bb_t* absmm_cc_t* cmm_aa cmm_bb cmm_cc ability_?? ability_??_* skill_?? skill_??_*) ///
-                   star(\sym{\dagger} 0.10 \sym{*} 0.05 \sym{**} 0.01) replace
+                   star(* 0.10 ** 0.05 *** 0.01) replace
 				   
 				   
 /*------------------------------------------------------------------------------------*/
@@ -1951,7 +1951,7 @@ esttab iv_mm_means_pos_neg iv_mm_ten_means_pos_neg iv_cmm_mm_means_pos_neg ols_m
 		   drop(_I* ten* exp* oj $zlist _cons) ///
 		   mtitles("IV" "IV" "IV" "OLS" "OLS" "OLS") ///
 		   order(mm_??? mm_???_ten_occ cmm_???) ///
-                   star(\sym{\dagger} 0.10 \sym{*} 0.05 \sym{**} 0.01) replace
+                   star(* 0.10 ** 0.05 *** 0.01) replace
 		   
 esttab iv_mm_means_pos_neg iv_mm_ten_means_pos_neg iv_cmm_mm_means_pos_neg ols_mm_means_pos_neg ols_mm_ten_means_pos_neg ols_cmm_mm_means_pos_neg ///
                    using ${result}/table_apx_${diminitls}_pos_neg.tex, b(4) se(4) ///
@@ -1963,7 +1963,7 @@ esttab iv_mm_means_pos_neg iv_mm_ten_means_pos_neg iv_cmm_mm_means_pos_neg ols_m
 		   mtitles("IV" "IV" "IV" "OLS" "OLS" "OLS") ///
 		   title("Wage Regression with Mismatch by Components (Full Results)") ///
 		   order(mm_??? mm_???_ten_occ cmm_??? ten* exp* oj $zlist _cons) ///
-                   star(\sym{\dagger} 0.10 \sym{*} 0.05 \sym{**} 0.01) replace
+                   star(* 0.10 ** 0.05 *** 0.01) replace
 
 
 estimate use ${result}/iv_mm_means_pos_neg_rbst.ster
@@ -1981,7 +1981,7 @@ esttab iv_mm_means_pos_neg iv_mm_ten_means_pos_neg iv_cmm_mm_means_pos_neg iv_mm
 		   drop(_I* ten* exp* oj $zlist _cons) ///
 		   mtitles("IV-GLS" "IV-GLS" "IV-GLS" "IV-RBST" "IV-RBST" "IV-RBST") ///
 		   order(mm_??? mm_???_ten_occ cmm_???) ///
-                   star(\sym{\dagger} 0.10 \sym{*} 0.05 \sym{**} 0.01) replace
+                   star(* 0.10 ** 0.05 *** 0.01) replace
 		   
 
 
@@ -2011,7 +2011,7 @@ esttab iv_ind_mm_means iv_ind_mm_ten_means iv_ind_cmm_mm_means ols_ind_mm_means 
 		   drop(_I* ten* exp* oj $zlist _cons) ///
 		   mtitles("IV" "IV" "IV" "OLS" "OLS" "OLS") ///
 		   order(absmm_aa absmm_bb absmm_cc absmm_aa_t* absmm_bb_t* absmm_cc_t* cmm_aa cmm_bb cmm_cc ability_?? ability_??_* skill_?? skill_??_*) ///
-                   star(\sym{\dagger} 0.10 \sym{*} 0.05 \sym{**} 0.01) replace
+                   star(* 0.10 ** 0.05 *** 0.01) replace
 		   
 esttab iv_ind_mm_means iv_ind_mm_ten_means iv_ind_cmm_mm_means ols_ind_mm_means ols_ind_mm_ten_means ols_ind_cmm_mm_means ///
                    using ${result}/table_apx_${diminitls}_ind.tex, b(4) se(4) ///
@@ -2023,7 +2023,7 @@ esttab iv_ind_mm_means iv_ind_mm_ten_means iv_ind_cmm_mm_means ols_ind_mm_means 
 		   mtitles("IV" "IV" "IV" "OLS" "OLS" "OLS") ///
 		   title("Wage Regression with Mismatch by Components (Full Results)") ///
 		   order(absmm_aa absmm_bb absmm_cc absmm_aa_t* absmm_bb_t* absmm_cc_t* cmm_aa cmm_bb cmm_cc ability_?? ability_??_* skill_?? skill_??_* ten* exp* oj $zlist _cons) ///
-                   star(\sym{\dagger} 0.10 \sym{*} 0.05 \sym{**} 0.01) replace
+                   star(* 0.10 ** 0.05 *** 0.01) replace
 
 
 estimate use ${result}/iv_ind_mm_means_rbst.ster
@@ -2041,7 +2041,7 @@ esttab iv_ind_mm_means iv_ind_mm_ten_means iv_ind_cmm_mm_means iv_ind_mm_means_r
 		   drop(_I* ten* exp* oj $zlist _cons) ///
 		   mtitles("IV-GLS" "IV-GLS" "IV-GLS" "IV-RBST" "IV-RBST" "IV-RBST") ///
 		   order(absmm_aa absmm_bb absmm_cc absmm_aa_t* absmm_bb_t* absmm_cc_t* cmm_aa cmm_bb cmm_cc ability_?? ability_??_* skill_?? skill_??_*) ///
-                   star(\sym{\dagger} 0.10 \sym{*} 0.05 \sym{**} 0.01) replace
+                   star(* 0.10 ** 0.05 *** 0.01) replace
 				   
 				   
 /*------------------------------------------------------------------------------------*/
@@ -2070,7 +2070,7 @@ esttab iv_mm_means_pos_neg iv_mm_ten_means_pos_neg iv_cmm_mm_means_pos_neg ols_m
 		   drop(_I* ten* exp* oj $zlist _cons) ///
 		   mtitles("IV" "IV" "IV" "OLS" "OLS" "OLS") ///
 		   order(mm_??? mm_???_ten_occ cmm_???) ///
-                   star(\sym{\dagger} 0.10 \sym{*} 0.05 \sym{**} 0.01) replace
+                   star(* 0.10 ** 0.05 *** 0.01) replace
 		   
 esttab iv_mm_means_pos_neg iv_mm_ten_means_pos_neg iv_cmm_mm_means_pos_neg ols_mm_means_pos_neg ols_mm_ten_means_pos_neg ols_cmm_mm_means_pos_neg ///
                    using ${result}/table_apx_${diminitls}_pos_neg.tex, b(4) se(4) ///
@@ -2082,7 +2082,7 @@ esttab iv_mm_means_pos_neg iv_mm_ten_means_pos_neg iv_cmm_mm_means_pos_neg ols_m
 		   mtitles("IV" "IV" "IV" "OLS" "OLS" "OLS") ///
 		   title("Wage Regression with Mismatch by Components (Full Results)") ///
 		   order(mm_??? mm_???_ten_occ cmm_??? ten* exp* oj $zlist _cons) ///
-                   star(\sym{\dagger} 0.10 \sym{*} 0.05 \sym{**} 0.01) replace
+                   star(* 0.10 ** 0.05 *** 0.01) replace
 
 
 estimate use ${result}/iv_mm_fe_rbst.ster
@@ -2100,7 +2100,7 @@ esttab iv_mm_fe iv_mm_ten_fe iv_cmm_mm_fe iv_mm_fe_rbst iv_mm_ten_fe_rbst iv_cmm
 		   drop(_I* ten* exp* oj $zlist _cons) ///
 		   mtitles("IV-GLS" "IV-GLS" "IV-GLS" "IV-RBST" "IV-RBST" "IV-RBST") ///
 		   order(mm_??? mm_???_ten_occ cmm_???) ///
-                   star(\sym{\dagger} 0.10 \sym{*} 0.05 \sym{**} 0.01) replace
+                   star(* 0.10 ** 0.05 *** 0.01) replace
 		   
 
 
