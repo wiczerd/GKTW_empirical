@@ -1233,7 +1233,7 @@ forvalues iter=1/50{
 	}
 	drop *_R uhat
 }
-xi: reg lwage mm_pos mm_neg $xlist $zlist i.ind_1d i.occ_1d, vce(robust)
+xi: reg lwage mm_pos_ten_occ mm_neg_ten_occ mm_pos mm_neg $xlist $zlist i.ind_1d i.occ_1d, vce(robust)
 estimate save ${result}/ols_mm_ten_means_pos_neg_rbst.ster, replace
 
 
