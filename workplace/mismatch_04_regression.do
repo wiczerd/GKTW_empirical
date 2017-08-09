@@ -1260,7 +1260,7 @@ predict uhat, residuals
 reg uhat l.uhat, noc /*, fe  */
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist mm $zlist ability_mean skill_mean $xlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1294,7 +1294,7 @@ predict uhat, residuals
 reg uhat l.uhat, noc /*, fe  */
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist mm $zlist ability_mean skill_mean $xlist $ivlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1329,7 +1329,7 @@ predict uhat, residuals
 reg uhat l.uhat, noc /*, fe  */
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist mm cmm $zlist ability_mean skill_mean $xlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1361,7 +1361,7 @@ predict uhat, residuals
 reg uhat l.uhat, noc /*, fe  */
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist mm cmm $zlist ability_mean skill_mean $xlist $ivlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1396,7 +1396,7 @@ predict uhat, residuals
 reg uhat l.uhat , noc
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist mm_pos mm_neg $zlist $xlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1429,7 +1429,7 @@ predict uhat, residuals
 reg uhat l.uhat , noc
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist mm_pos mm_neg $zlist $xlist $ivlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1462,7 +1462,7 @@ predict uhat, residuals
 reg uhat l.uhat , noc
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist mm_pos mm_neg $zlist $xlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1494,7 +1494,7 @@ predict uhat, residuals
 reg uhat l.uhat , noc
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist mm_pos mm_neg $zlist $xlist $ivlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1529,7 +1529,7 @@ predict uhat, residuals
 reg uhat l.uhat , noc
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist mm_pos mm_neg cmm_pos cmm_neg $zlist $xlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1561,7 +1561,7 @@ predict uhat, residuals
 reg uhat l.uhat , noc
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist mm_pos mm_neg cmm_pos cmm_neg $zlist $xlist $ivlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1595,7 +1595,7 @@ predict uhat, residuals
 reg uhat l.uhat , noc
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist absmm_?? $zlist ability_?? skill_??  $xlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1627,7 +1627,7 @@ predict uhat, residuals
 reg uhat l.uhat , noc
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist absmm_?? $zlist ability_?? skill_??  $xlist $ivlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1661,7 +1661,7 @@ predict uhat, residuals
 reg uhat l.uhat , noc
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist absmm_?? $zlist ability_?? skill_??  $xlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1694,7 +1694,7 @@ predict uhat, residuals
 reg uhat l.uhat , noc
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist absmm_?? $zlist ability_?? skill_??  $xlist $ivlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1727,7 +1727,7 @@ predict uhat, residuals
 reg uhat l.uhat , noc
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist cmm_aa cmm_bb cmm_cc absmm_?? $zlist ability_?? skill_??  $xlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1759,7 +1759,7 @@ predict uhat, residuals
 reg uhat l.uhat , noc
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist cmm_aa cmm_bb cmm_cc absmm_?? $zlist ability_?? skill_??  $xlist $ivlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
