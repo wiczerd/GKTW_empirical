@@ -1566,10 +1566,6 @@ estimate store ols_cmm_mm_pos_neg_fe
 estimate use ${result}/iv_cmm_mm_pos_neg_fe.ster
 estimate store iv_cmm_mm_pos_neg_fe
 
-estimate use ${result}/iv_cmm_mm_pos_neg_boot.ster
-estimate store iv_cmm_mm_pos_neg_boot
-estimate use ${result}/iv_cmm_mm_pos_neg_fe_boot.ster
-estimate store iv_cmm_mm_pos_neg_fe_boot
 estimate use ${result}/iv_cmm_mm_pos_neg_rbst.ster
 estimate store iv_cmm_mm_pos_neg_rbst
 estimate use ${result}/iv_cmm_mm_pos_neg_fe_rbst.ster
