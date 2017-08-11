@@ -880,6 +880,8 @@ save $data/yearly_03.dta, replace
 /*------------------------------------------------------------------------------------*/
 /*------------------------------------------------------------------------------------*/
 
+use $data/yearly_03.dta, clear
+
 sort id year
 by id: gen counter = _n
 egen max_counter = max(counter), by(id)
@@ -903,7 +905,7 @@ global ivlist_0 ten_emp_iv ten_emp2_iv ten_occ_iv ten_occ2_iv ten_occ3_iv exp_iv
 /* ols regression */
 xtset id year
 global xlist $xlist_0
-xi: xtreg lwage $xlist $zlist i.ind_1d i.occ_1d if multobs_01 == 1, fe robust
+xi: xtivreg2 lwage $xlist $zlist i.ind_1d i.occ_1d if multobs_01 == 1, fe bw(2)
 estimate save ${result}/bench_ols.ster, replace
 sort id year
 
@@ -911,115 +913,115 @@ sort id year
 xtset id year
 global xlist $xlist_0
 global ivlist $ivlist_0
-xi: xtivreg2 lwage ($xlist = $ivlist) $zlist i.ind_1d i.occ_1d if multobs_01 == 1, fe robust
+xi: xtivreg2 lwage ($xlist = $ivlist) $zlist i.ind_1d i.occ_1d if multobs_01 == 1, fe  bw(2)
 estimate save ${result}/bench_iv.ster, replace
 
 /*------------------------------------------------------------------------------------*/
 /* mismatch */
 
 global xlist  ability_mean_ten_occ skill_mean_ten_occ $xlist_0
-xi: xtreg lwage mm $xlist $zlist skill_mean i.ind_1d i.occ_1d if multobs_01 == 1, fe robust
+xi: xtivreg2 lwage mm $xlist $zlist skill_mean i.ind_1d i.occ_1d if multobs_01 == 1, fe bw(2)
 estimate save ${result}/ols_mm_means.ster, replace
 
 global xlist  ability_mean_ten_occ skill_mean_ten_occ $xlist_0
 global ivlist ability_mean_ten_occ_iv skill_mean_ten_occ_iv $ivlist_0
-xi: xtivreg2 lwage mm ($xlist = $ivlist) $zlist skill_mean i.ind_1d i.occ_1d if multobs_01 == 1, fe robust
+xi: xtivreg2 lwage mm ($xlist = $ivlist) $zlist skill_mean i.ind_1d i.occ_1d if multobs_01 == 1, fe bw(2)
 estimate save ${result}/iv_mm_means.ster, replace
 
 /*------------------------------------------------------------------------------------*/
 /* mismatch with tenure */
 
 global xlist  mm_ten_occ ability_mean_ten_occ skill_mean_ten_occ $xlist_0
-xi: xtreg lwage mm $xlist $zlist skill_mean i.ind_1d i.occ_1d if multobs_01 == 1, fe robust
+xi: xtivreg2 lwage mm $xlist $zlist skill_mean i.ind_1d i.occ_1d if multobs_01 == 1, fe bw(2)
 estimate save ${result}/ols_mm_ten_means.ster, replace
 
 global xlist  mm_ten_occ ability_mean_ten_occ skill_mean_ten_occ $xlist_0
 global ivlist mm_ten_occ_iv ability_mean_ten_occ_iv skill_mean_ten_occ_iv $ivlist_0
-xi: xtivreg2 lwage mm ($xlist = $ivlist) $zlist skill_mean i.ind_1d i.occ_1d if multobs_01 == 1, fe robust
+xi: xtivreg2 lwage mm ($xlist = $ivlist) $zlist skill_mean i.ind_1d i.occ_1d if multobs_01 == 1, fe bw(2)
 estimate save ${result}/iv_mm_ten_means.ster, replace
+
+/*------------------------------------------------------------------------------------*/
+/* cumulative mismatch */
+
+global xlist  mm_ten_occ ability_mean_ten_occ skill_mean_ten_occ $xlist_0
+xi: xtivreg2 lwage mm cmm $xlist $zlist skill_mean i.ind_1d i.occ_1d if multobs_02 == 1, fe bw(2)
+estimate save ${result}/ols_cmm_mm_means.ster, replace
+
+global xlist  mm_ten_occ ability_mean_ten_occ skill_mean_ten_occ $xlist_0
+global ivlist mm_ten_occ_iv ability_mean_ten_occ_iv skill_mean_ten_occ_iv $ivlist_0
+xi: xtivreg2 lwage mm cmm ($xlist = $ivlist) $zlist skill_mean i.ind_1d i.occ_1d if multobs_02 == 1, fe bw(2)
+estimate save ${result}/iv_cmm_mm_means.ster, replace
 
 /*------------------------------------------------------------------------------------*/
 /* mismatch with positive & negative components */
 
 global xlist  $xlist_0
-xi: xtreg lwage mm_pos mm_neg $xlist $zlist i.ind_1d i.occ_1d if multobs_01 == 1, fe robust
+xi: xtivreg2 lwage mm_pos mm_neg $xlist $zlist i.ind_1d i.occ_1d if multobs_01 == 1, fe bw(2)
 estimate save ${result}/ols_mm_means_pos_neg.ster, replace
 
 global xlist  $xlist_0
 global ivlist $ivlist_0
-xi: xtivreg2 lwage mm_pos mm_neg ($xlist = $ivlist) $zlist i.ind_1d i.occ_1d if multobs_01 == 1, fe robust
+xi: xtivreg2 lwage mm_pos mm_neg ($xlist = $ivlist) $zlist i.ind_1d i.occ_1d if multobs_01 == 1, fe bw(2)
 estimate save ${result}/iv_mm_means_pos_neg.ster, replace
 
 /*------------------------------------------------------------------------------------*/
 /* mismatch with positive & negative components with tenure */
 
 global xlist  mm_pos_ten_occ mm_neg_ten_occ $xlist_0
-xi: xtreg lwage mm_pos mm_neg $xlist $zlist i.ind_1d i.occ_1d if multobs_01 == 1, fe robust
+xi: xtivreg2 lwage mm_pos mm_neg $xlist $zlist i.ind_1d i.occ_1d if multobs_01 == 1, fe bw(2)
 estimate save ${result}/ols_mm_ten_means_pos_neg.ster, replace
 
 global xlist  mm_pos_ten_occ mm_neg_ten_occ $xlist_0
 global ivlist mm_pos_ten_occ_iv mm_neg_ten_occ_iv $ivlist_0
-xi: xtivreg2 lwage mm_pos mm_neg ($xlist = $ivlist) $zlist i.ind_1d i.occ_1d if multobs_01 == 1, fe robust
+xi: xtivreg2 lwage mm_pos mm_neg ($xlist = $ivlist) $zlist i.ind_1d i.occ_1d if multobs_01 == 1, fe bw(2)
 estimate save ${result}/iv_mm_ten_means_pos_neg.ster, replace
-
-/*------------------------------------------------------------------------------------*/
-/* cumulative mismatch */
-
-global xlist  mm_ten_occ ability_mean_ten_occ skill_mean_ten_occ $xlist_0
-xi: xtreg lwage mm cmm $xlist $zlist skill_mean i.ind_1d i.occ_1d if multobs_02 == 1, fe robust
-estimate save ${result}/ols_cmm_mm_means.ster, replace
-
-global xlist  mm_ten_occ ability_mean_ten_occ skill_mean_ten_occ $xlist_0
-global ivlist mm_ten_occ_iv ability_mean_ten_occ_iv skill_mean_ten_occ_iv $ivlist_0
-xi: xtivreg2 lwage mm cmm ($xlist = $ivlist) $zlist skill_mean i.ind_1d i.occ_1d if multobs_02 == 1, fe robust
-estimate save ${result}/iv_cmm_mm_means.ster, replace
 
 /*------------------------------------------------------------------------------------*/
 /* cumulative mismatch with positive & negative components */
 
 global xlist  mm_pos_ten_occ mm_neg_ten_occ $xlist_0
-xi: xtreg lwage mm_pos mm_neg cmm_pos cmm_neg $xlist $zlist i.ind_1d i.occ_1d if multobs_02 == 1, fe robust
+xi: xtivreg2 lwage mm_pos mm_neg cmm_pos cmm_neg $xlist $zlist i.ind_1d i.occ_1d if multobs_02 == 1, fe bw(2)
 estimate save ${result}/ols_cmm_mm_means_pos_neg.ster, replace
 
 global xlist  mm_pos_ten_occ mm_neg_ten_occ $xlist_0
 global ivlist mm_pos_ten_occ_iv mm_neg_ten_occ_iv $ivlist_0
-xi: xtivreg2 lwage mm_pos mm_neg cmm_pos cmm_neg ($xlist = $ivlist) $zlist i.ind_1d i.occ_1d if multobs_02 == 1, fe robust
+xi: xtivreg2 lwage mm_pos mm_neg cmm_pos cmm_neg ($xlist = $ivlist) $zlist i.ind_1d i.occ_1d if multobs_02 == 1, fe bw(2)
 estimate save ${result}/iv_cmm_mm_means_pos_neg.ster, replace
 
 /*------------------------------------------------------------------------------------*/
 /* individual component mismatch */
 
 global xlist  ability_??_ten_occ skill_??_ten_occ $xlist_0
-xi: xtreg lwage absmm_?? $xlist $zlist skill_?? i.ind_1d i.occ_1d if multobs_01 == 1, fe robust
+xi: xtivreg2 lwage absmm_?? $xlist $zlist skill_?? i.ind_1d i.occ_1d if multobs_01 == 1, fe bw(2)
 estimate save ${result}/ols_ind_mm_means.ster, replace
 
 global xlist  ability_??_ten_occ skill_??_ten_occ $xlist_0
 global ivlist ability_??_ten_occ_iv skill_??_ten_occ_iv $ivlist_0
-xi: xtivreg2 lwage absmm_?? ($xlist = $ivlist) $zlist skill_?? i.ind_1d i.occ_1d if multobs_01 == 1, fe robust
+xi: xtivreg2 lwage absmm_?? ($xlist = $ivlist) $zlist skill_?? i.ind_1d i.occ_1d if multobs_01 == 1, fe bw(2)
 estimate save ${result}/iv_ind_mm_means.ster, replace
 
 /*------------------------------------------------------------------------------------*/
 /* individual component mismatch with tenure */
 
 global xlist  absmm_??_ten_occ ability_??_ten_occ skill_??_ten_occ $xlist_0
-xi: xtreg lwage absmm_?? $xlist $zlist skill_?? i.ind_1d i.occ_1d if multobs_01 == 1, fe robust
+xi: xtivreg2 lwage absmm_?? $xlist $zlist skill_?? i.ind_1d i.occ_1d if multobs_01 == 1, fe bw(2)
 estimate save ${result}/ols_ind_mm_ten_means.ster, replace
 
 global xlist  absmm_??_ten_occ ability_??_ten_occ skill_??_ten_occ $xlist_0
 global ivlist absmm_??_ten_occ_iv ability_??_ten_occ_iv skill_??_ten_occ_iv $ivlist_0
-xi: xtivreg2 lwage absmm_?? ($xlist = $ivlist) $zlist skill_?? i.ind_1d i.occ_1d if multobs_01 == 1, fe robust
+xi: xtivreg2 lwage absmm_?? ($xlist = $ivlist) $zlist skill_?? i.ind_1d i.occ_1d if multobs_01 == 1, fe bw(2)
 estimate save ${result}/iv_ind_mm_ten_means.ster, replace
 
 /*------------------------------------------------------------------------------------*/
 /* individual component cumulative mismatch */
 
 global xlist  absmm_??_ten_occ ability_??_ten_occ skill_??_ten_occ $xlist_0 
-xi: xtreg lwage cmm_aa cmm_bb cmm_cc absmm_?? $xlist $zlist skill_?? i.ind_1d i.occ_1d if multobs_02 == 1, fe robust
+xi: xtivreg2 lwage cmm_aa cmm_bb cmm_cc absmm_?? $xlist $zlist skill_?? i.ind_1d i.occ_1d if multobs_02 == 1, fe bw(2)
 estimate save ${result}/ols_ind_cmm_mm_means.ster, replace
 
 global xlist  absmm_??_ten_occ ability_??_ten_occ skill_??_ten_occ $xlist_0 
 global ivlist absmm_??_ten_occ_iv ability_??_ten_occ_iv skill_??_ten_occ_iv $ivlist_0
-xi: xtivreg2 lwage cmm_aa cmm_bb cmm_cc absmm_?? ($xlist = $ivlist) $zlist skill_?? i.ind_1d i.occ_1d if multobs_02 == 1, fe robust
+xi: xtivreg2 lwage cmm_aa cmm_bb cmm_cc absmm_?? ($xlist = $ivlist) $zlist skill_?? i.ind_1d i.occ_1d if multobs_02 == 1, fe bw(2)
 estimate save ${result}/iv_ind_cmm_mm_means.ster, replace
 
 /*------------------------------------------------------------------------------------*/
