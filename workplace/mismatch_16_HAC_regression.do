@@ -915,7 +915,7 @@ estimate save ${result}/iv_mm_means.ster, replace
 /* mismatch with tenure */
 
 global xlist  mm_ten_occ ability_mean_ten_occ skill_mean_ten_occ $xlist_0
-xi: ivreg2 lwage mm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d , vce(robust)
+xi: ivreg2 lwage mm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d , bw(2)
 estimate save ${result}/ols_mm_ten_means.ster, replace
 
 global xlist  mm_ten_occ ability_mean_ten_occ skill_mean_ten_occ $xlist_0
