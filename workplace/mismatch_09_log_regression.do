@@ -920,50 +920,50 @@ global ivlist_0 ten_emp_iv ten_emp2_iv ten_occ_iv ten_occ2_iv ten_occ3_iv exp_iv
 /* ols regression */
 xtset id year
 global xlist $xlist_0
-xi: reg lwage $xlist $zlist i.ind_1d i.occ_1d, vce(robust)
+xi: ivreg2 lwage $xlist $zlist i.ind_1d i.occ_1d, robust bw(2)
 estimate save ${result}/bench_ols.ster, replace
 
 /* iv regression (Altonji and Shakotko) */
 xtset id year
 global xlist $xlist_0
 global ivlist $ivlist_0
-xi: ivregress 2sls lwage ($xlist = $ivlist) $zlist i.ind_1d i.occ_1d , vce(robust)
+xi: ivreg2 lwage ($xlist = $ivlist) $zlist i.ind_1d i.occ_1d , robust bw(2)
 estimate save ${result}/bench_iv.ster, replace
 
 /*------------------------------------------------------------------------------------*/
 /* mismatch */
 
 global xlist  ability_mean_ten_occ skill_mean_ten_occ $xlist_0
-xi: reg lwage mm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d , vce(robust)
+xi: ivreg2 lwage mm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d , robust bw(2)
 estimate save ${result}/ols_mm_means.ster, replace
 
 global xlist  ability_mean_ten_occ skill_mean_ten_occ $xlist_0
 global ivlist ability_mean_ten_occ_iv skill_mean_ten_occ_iv $ivlist_0
-xi: ivregress 2sls lwage mm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d , vce(robust)
+xi: ivreg2 lwage mm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d , robust bw(2)
 estimate save ${result}/iv_mm_means.ster, replace
 
 /*------------------------------------------------------------------------------------*/
 /* mismatch with tenure */
 
 global xlist  mm_ten_occ ability_mean_ten_occ skill_mean_ten_occ $xlist_0
-xi: reg lwage mm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d , vce(robust)
+xi: ivreg2 lwage mm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d , robust bw(2)
 estimate save ${result}/ols_mm_ten_means.ster, replace
 
 global xlist  mm_ten_occ ability_mean_ten_occ skill_mean_ten_occ $xlist_0
 global ivlist mm_ten_occ_iv ability_mean_ten_occ_iv skill_mean_ten_occ_iv $ivlist_0
-xi: ivregress 2sls lwage mm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d , vce(robust)
+xi: ivreg2 lwage mm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d , robust bw(2)
 estimate save ${result}/iv_mm_ten_means.ster, replace
 
 /*------------------------------------------------------------------------------------*/
 /* cumulative mismatch */
 
 global xlist  mm_ten_occ ability_mean_ten_occ skill_mean_ten_occ $xlist_0
-xi: reg lwage mm cmm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d, vce(robust)
+xi: ivreg2 lwage mm cmm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d, robust bw(2)
 estimate save ${result}/ols_cmm_mm_means.ster, replace
 
 global xlist  mm_ten_occ ability_mean_ten_occ skill_mean_ten_occ $xlist_0
 global ivlist mm_ten_occ_iv ability_mean_ten_occ_iv skill_mean_ten_occ_iv $ivlist_0
-xi: ivregress 2sls lwage mm cmm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d, vce(robust)
+xi: ivreg2 lwage mm cmm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d, robust bw(2)
 estimate save ${result}/iv_cmm_mm_means.ster, replace
 
 /*------------------------------------------------------------------------------------*/
