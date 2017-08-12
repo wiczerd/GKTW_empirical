@@ -1076,7 +1076,7 @@ predict uhat, residuals
 reg uhat l.uhat, noc /*, fe  */
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist mm cmm $zlist ability_mean skill_mean $xlist $ivlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1112,9 +1112,9 @@ xi: ivregress 2sls lwage mm cmm ($xlist = $ivlist) $zlist ability_mean skill_mea
 estimate save ${result}/iv_cmm_mm_clu.ster, replace
 
 
-*with gmm AR(1) standard errors for comparison
-xi: ivregress gmm lwage mm cmm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d, wmatrix(hac nw 1) igmm eps(1e-4)
-estimate save ${result}/iv_cmm_mm_gmm.ster, replace
+*with HAC AR(1) standard errors for comparison
+xi: ivreg2 lwage mm cmm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d, bw(2) robust
+estimate save ${result}/iv_cmm_mm_hac.ster, replace
 
 
 /*------------------------------------------------------------------------------------*/
@@ -1144,7 +1144,7 @@ predict uhat, e
 reg uhat l.uhat , noc
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist mm cmm  skill_mean  $xlist $ivlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1169,47 +1169,20 @@ forvalues iter=1/50{
 	drop *_R uhat
 }
 
-*with robust errors for baseline
+*with robust errors for comparison
 xtivreg2 lwage mm cmm  skill_mean _Iind_1d_* _Iocc_1d_* ($xlist = $ivlist) , robust fe
 estimate save ${result}/iv_cmm_mm_fe_rbst.ster, replace
 
 
-/*------------------------------------------------------------------------------------*/
-/* mismatch with positive & negative components */
+*with cluster errors for comparison
+xtivreg2 lwage mm cmm  skill_mean _Iind_1d_* _Iocc_1d_* ($xlist = $ivlist) , cluster(id) fe
+estimate save ${result}/iv_cmm_mm_fe_clu.ster, replace
 
-global xlist  $xlist_0
-xi: reg lwage mm_pos mm_neg $xlist $zlist i.ind_1d i.occ_1d, vce(${vcetxt})
-estimate save ${result}/ols_mm_pos_neg.ster, replace
 
-global xlist  $xlist_0
-global ivlist $ivlist_0
-if("$varmeth" == "boot" & "$varcor" == "cid"){
-	xtset, clear
-	bootstrap, cluster(id_job) seed(9487): ivregress 2sls lwage mm_pos mm_neg ($xlist = $ivlist) $zlist i.ind_1d i.occ_1d 
-	estimate save ${result}/iv_mm_pos_neg_boot.ster, replace
-	xtset id year
-} 
-xi: ivregress 2sls lwage mm_pos mm_neg ($xlist = $ivlist) $zlist i.ind_1d i.occ_1d , vce(${vcetxt})
-estimate save ${result}/iv_mm_pos_neg.ster, replace
+*with HAC errors for baseline
+xtivreg2 lwage mm cmm  skill_mean _Iind_1d_* _Iocc_1d_* ($xlist = $ivlist) , bw(2) robust fe
+estimate save ${result}/iv_cmm_mm_fe_hac.ster, replace
 
-/*------------------------------------------------------------------------------------*/
-/* mismatch with positive & negative components with tenure */
-
-global xlist  mm_pos_ten_occ mm_neg_ten_occ $xlist_0
-xi: reg lwage mm_pos mm_neg $xlist $zlist i.ind_1d i.occ_1d, vce(${vcetxt})
-estimate save ${result}/ols_mm_ten_pos_neg.ster, replace
-
-global xlist  mm_pos_ten_occ mm_neg_ten_occ $xlist_0
-global ivlist mm_pos_ten_occ_iv mm_neg_ten_occ_iv $ivlist_0
-if("$varmeth" == "boot" & "$varcor" == "cid"){
-	xtset, clear
-	bootstrap, cluster(id_job)  seed(9487): ivregress 2sls lwage mm_pos mm_neg ($xlist = $ivlist) $zlist i.ind_1d i.occ_1d 
-	estimate save ${result}/iv_mm_ten_pos_neg_boot.ster, replace
-	xtset id year
-
-} 
-xi: ivregress 2sls lwage mm_pos mm_neg ($xlist = $ivlist) $zlist i.ind_1d i.occ_1d , vce(${vcetxt})
-estimate save ${result}/iv_mm_ten_pos_neg.ster, replace
 
 
 /*------------------------------------------------------------------------------------*/
@@ -1237,7 +1210,7 @@ predict uhat, residuals
 reg uhat l.uhat , noc
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist mm_pos mm_neg cmm_pos cmm_neg $zlist $xlist $ivlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1268,6 +1241,14 @@ xi: ivregress 2sls lwage mm_pos mm_neg cmm_pos cmm_neg ($xlist = $ivlist) $zlist
 estimate save ${result}/iv_cmm_mm_pos_neg_rbst.ster, replace
 
 
+xi: ivreg2 lwage mm_pos mm_neg cmm_pos cmm_neg ($xlist = $ivlist) $zlist i.ind_1d i.occ_1d, bw(2) robust
+estimate save ${result}/iv_cmm_mm_pos_neg_hac.ster, replace
+
+xi: ivreg2 lwage mm_pos mm_neg cmm_pos cmm_neg ($xlist = $ivlist) $zlist i.ind_1d i.occ_1d, cluster(id)
+estimate save ${result}/iv_cmm_mm_pos_neg_clu.ster, replace
+
+
+
 /*------------------------------------------------------------------------------------*/
 /* cumulative mismatch with positive & negative components and fixed effects*/
 
@@ -1293,7 +1274,7 @@ predict uhat, e
 reg uhat l.uhat , noc
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist mm_pos mm_neg cmm_pos cmm_neg $xlist $ivlist lwage{		
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1321,66 +1302,21 @@ forvalues iter=1/50{
 
 
 
-*with robust errors for baseline
-xtivreg2 lwage mm_pos mm_neg cmm_pos cmm_neg _Iind_1d* _Iocc_1d* ($xlist = $ivlist), robust fe
+*with hac errors for baseline
+xtivreg2 lwage mm_pos mm_neg cmm_pos cmm_neg _Iind_1d* _Iocc_1d* ($xlist = $ivlist), bw(2) robust fe
 estimate save ${result}/iv_cmm_mm_pos_neg_fe_rbst.ster, replace
 
 
-/*------------------------------------------------------------------------------------*/
-/* individual component mismatch */
+*with robust errors for comparison
+xtivreg2 lwage mm_pos mm_neg cmm_pos cmm_neg _Iind_1d* _Iocc_1d* ($xlist = $ivlist), robust fe
+estimate save ${result}/iv_cmm_mm_pos_neg_fe_rbst.ster, replace
 
-global xlist  ability_??_ten_occ skill_??_ten_occ $xlist_0
-xi: reg lwage absmm_?? $xlist $zlist ability_?? skill_?? i.ind_1d i.occ_1d , vce(${vcetxt})
-estimate save ${result}/ols_ind_mm.ster, replace
-
-global xlist  ability_??_ten_occ skill_??_ten_occ $xlist_0
-global ivlist ability_??_ten_occ_iv skill_??_ten_occ_iv $ivlist_0
-if("$varmeth" == "boot" & "$varcor" == "cid"){
-	xtset,clear
-	bootstrap, cluster(id_job)  seed(9487): ivregress 2sls lwage absmm_?? ($xlist = $ivlist) $zlist ability_?? skill_?? i.ind_1d i.occ_1d 
-	estimate save ${result}/iv_ind_mm_boot.ster, replace
-	xtset id year
-}
-else{
-	xi: ivregress 2sls lwage absmm_?? ($xlist = $ivlist) $zlist ability_?? skill_?? i.ind_1d i.occ_1d , vce(${vcetxt})
-} 
-estimate save ${result}/iv_ind_mm.ster, replace
-
-/*------------------------------------------------------------------------------------*/
-/* individual component mismatch with tenure */
-
-global xlist  absmm_??_ten_occ ability_??_ten_occ skill_??_ten_occ $xlist_0
-xi: reg lwage absmm_?? $xlist $zlist ability_?? skill_?? i.ind_1d i.occ_1d , vce(${vcetxt})
-estimate save ${result}/ols_ind_mm_ten.ster, replace
-
-global xlist  absmm_??_ten_occ ability_??_ten_occ skill_??_ten_occ $xlist_0
-global ivlist absmm_??_ten_occ_iv ability_??_ten_occ_iv skill_??_ten_occ_iv $ivlist_0
-if("$varmeth" == "boot" & "$varcor" == "cid"){
-	xtset, clear
-	bootstrap, cluster(id_job)  seed(9487): ivregress 2sls  lwage absmm_?? ($xlist = $ivlist) $zlist ability_?? skill_?? i.ind_1d i.occ_1d 
-	estimate save ${result}/iv_ind_mm_ten_boot.ster, replace
-	xtset id year
-} 
-xi: ivregress 2sls lwage absmm_?? ($xlist = $ivlist) $zlist ability_?? skill_?? i.ind_1d i.occ_1d , vce(${vcetxt})
-estimate save ${result}/iv_ind_mm_ten.ster, replace
+*with cluster errors for comparison
+xtivreg2 lwage mm_pos mm_neg cmm_pos cmm_neg _Iind_1d* _Iocc_1d* ($xlist = $ivlist), cluster(id) fe
+estimate save ${result}/iv_cmm_mm_pos_neg_fe_clu.ster, replace
 
 /*------------------------------------------------------------------------------------*/
 /* individual component cumulative mismatch */
-
-global xlist  absmm_??_ten_occ ability_??_ten_occ skill_??_ten_occ $xlist_0 
-xi: reg lwage cmm_aa cmm_bb cmm_cc absmm_?? $xlist $zlist ability_?? skill_?? i.ind_1d i.occ_1d, vce(${vcetxt})
-estimate save ${result}/ols_ind_cmm_mm.ster, replace
-
-global xlist  absmm_??_ten_occ ability_??_ten_occ skill_??_ten_occ $xlist_0 
-global ivlist absmm_??_ten_occ_iv ability_??_ten_occ_iv skill_??_ten_occ_iv $ivlist_0
-if("$varmeth" == "boot" & "$varcor" == "cid"){
-	xtset,clear
-	bootstrap, cluster(id)  seed(9487): ivregress 2sls  lwage cmm_aa cmm_bb cmm_cc absmm_?? ($xlist = $ivlist) $zlist ability_?? skill_?? i.ind_1d i.occ_1d
-	estimate save ${result}/iv_ind_cmm_mm_boot.ster, replace
-	xtset id year
-} 
-xi: ivregress 2sls lwage cmm_aa cmm_bb cmm_cc absmm_?? ($xlist = $ivlist) $zlist ability_?? skill_?? i.ind_1d i.occ_1d, vce(${vcetxt})
-estimate save ${result}/iv_ind_cmm_mm.ster, replace
 
 *FGLS attempt
 xi: ivregress 2sls lwage cmm_aa cmm_bb cmm_cc absmm_?? ($xlist = $ivlist) $zlist ability_?? skill_?? i.ind_1d i.occ_1d
@@ -1388,7 +1324,7 @@ predict uhat, residuals
 reg uhat l.uhat , noc
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist cmm_aa cmm_bb cmm_cc absmm_?? $zlist ability_?? skill_??  $xlist $ivlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1414,9 +1350,17 @@ forvalues iter=1/50{
 }
 
 
-*with robust errors for baseline
+*with robust errors for comparison
 xi: ivregress 2sls lwage cmm_aa cmm_bb cmm_cc absmm_?? ($xlist = $ivlist) $zlist ability_?? skill_?? i.ind_1d i.occ_1d, vce(robust)
 estimate save ${result}/iv_ind_cmm_mm_rbst.ster, replace
+
+xi: ivreg2 lwage cmm_aa cmm_bb cmm_cc absmm_?? ($xlist = $ivlist) $zlist ability_?? skill_?? i.ind_1d i.occ_1d, bw(2) robust
+estimate save ${result}/iv_ind_cmm_mm_hac.ster, replace
+
+
+xi: ivreg2 lwage cmm_aa cmm_bb cmm_cc absmm_?? ($xlist = $ivlist) $zlist ability_?? skill_?? i.ind_1d i.occ_1d, cluster(id)
+estimate save ${result}/iv_ind_cmm_mm_clu.ster, replace
+
 
 
 /*------------------------------------------------------------------------------------*/
@@ -1444,7 +1388,7 @@ predict uhat, e
 reg uhat l.uhat , noc
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/15{
+qui forvalues iter=1/15{
 	qui foreach zv of varlist cmm_aa cmm_bb cmm_cc absmm_?? skill_?? $xlist $ivlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv' = `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1471,9 +1415,18 @@ forvalues iter=1/15{
 }
 
 
-*with robust errors for baseline
+*with HAC errors for baseline
+xtivreg2 lwage cmm_aa cmm_bb cmm_cc absmm_?? ($xlist = $ivlist)  skill_?? _Iind_1d* _Iocc_1d*, bw(2) robust fe
+estimate save ${result}/iv_ind_cmm_mm_fe_hac.ster, replace
+
+*with robust errors for comparison
 xtivreg2 lwage cmm_aa cmm_bb cmm_cc absmm_?? ($xlist = $ivlist)  skill_?? _Iind_1d* _Iocc_1d*, robust fe
 estimate save ${result}/iv_ind_cmm_mm_fe_rbst.ster, replace
+
+*with cluster errors for comparison
+xtivreg2 lwage cmm_aa cmm_bb cmm_cc absmm_?? ($xlist = $ivlist)  skill_?? _Iind_1d* _Iocc_1d*, cluster(id) fe
+estimate save ${result}/iv_ind_cmm_mm_fe_rbst.ster, replace
+
 
 
 /*------------------------------------------------------------------------------------*/
@@ -1493,65 +1446,71 @@ else if("${varcor}" == "rbst"){
 /* mismatch */
 
 estimate clear
-estimate use ${result}/ols_mm.ster
-estimate store ols_mm
-estimate use ${result}/ols_mm_ten.ster
-estimate store ols_mm_ten
-estimate use ${result}/ols_cmm_mm.ster
-estimate store ols_cmm_mm
-estimate use ${result}/ols_cmm_mm_fe.ster
-estimate store ols_cmm_mm_fe
 
-estimate use ${result}/iv_mm.ster
-estimate store iv_mm
-estimate use ${result}/iv_mm_ten.ster
-estimate store iv_mm_ten
+
 estimate use ${result}/iv_cmm_mm_clu.ster
 estimate store iv_cmm_mm_clu
-estimate use ${result}/iv_cmm_mm_fe.ster
-estimate store iv_cmm_mm_fe
+estimate use ${result}/iv_cmm_mm_fe_clu.ster
+estimate store iv_cmm_mm_fe_clu
 
-estimate use ${result}/iv_cmm_mm_fe_rbst.ster
-estimate store iv_cmm_mm_fe_rbst
 estimate use ${result}/iv_cmm_mm_rbst.ster
 estimate store iv_cmm_mm_rbst
+estimate use ${result}/iv_cmm_mm_fe_rbst.ster
+estimate store iv_cmm_mm_fe_rbst
+
+estimate use ${result}/iv_cmm_mm_fe_hac.ster
+estimate store iv_cmm_mm_fe_hac
+estimate use ${result}/iv_cmm_mm_hac.ster
+estimate store iv_cmm_mm_hac
 estimate use ${result}/iv_cmm_mm_fe_fgls.ster
 estimate store iv_cmm_mm_fe_fgls
 estimate use ${result}/iv_cmm_mm_fgls.ster
 estimate store iv_cmm_mm_fgls
 
-estimate use ${result}/iv_cmm_mm_boot.ster
-estimate store iv_cmm_mm_boot
-estimate use ${result}/iv_cmm_mm_fe_boot.ster
-estimate store iv_cmm_mm_fe_boot
 
-     star(\sym{*} 0.10 \sym{**} 0.05 \sym{***} 0.01) replace
-*FGLS
-esttab iv_cmm_mm_rbst iv_cmm_mm_clu iv_cmm_mm_fgls iv_cmm_mm_fe_fgls ///
-                   using ${result}/table_${diminitls}_${varcor}_${varmeth}_fgls.tex, b(4) ///
+esttab iv_cmm_mm_hac iv_cmm_mm_clu iv_cmm_mm_fgls iv_cmm_mm_fe_hac iv_cmm_mm_fe_clu ///
+                   using ${result}/table_${diminitls}_${varcor}_${varmeth}_r12compare.tex, b(4) ///
                    r2 nodepvars gaps label not nonotes substitute(\hline\hline \hline \hline "\hline  " "Standard" "${labtxt} standard" ///
                    "\sym{\sym{\dagger}}" "$^{\dagger}$" "\sym{\sym{*}}" "$^{*}$" "\sym{\sym{**}}" "$^{**}$") ///
 		   drop(*occ_1* *ind_1* ten* exp* oj $zlist _cons) ///
-		   mtitles("IV-RBST" "IV-CLU" "IV-FGLS" "IV-FE-FGLS") ///
+		   mtitles("IV-HAC" "IV-CLU" "IV-FGLS" "IV-FE-HAC" "IV-FE-CLU") ///
 		   order(mm mm_ten_occ cmm ability_mean ability_mean_ten_occ skill_mean skill_mean_ten_occ ten* exp* oj $zlist _cons) ///
                    star(\sym{\dagger} 0.10 \sym{*} 0.05 \sym{**} 0.01) replace
+
+*Table in response to referees
+matrix coef_se_compare = J(12,2,0.)
+matrix colnames coef_se_compare = "Coefficient" "Std Err"
+matrix rownames coef_se_compare = "Mismatch" "Mismatch \times Occ Tenure" "Cumul Mismatch" "Mismatch" "Mismatch \times Occ Tenure" "Cumul Mismatch" "Mismatch" "Mismatch \times Occ Tenure" "Cumul Mismatch" "Mismatch" "Mismatch \times Occ Tenure" "Cumul Mismatch" 
+
+forvalues ei = 1/4{
+	if(`ei' == 1){
+		estimates restore iv_cmm_mm_rbst
+	}
+	if(`ei' == 2){
+		estimates restore iv_cmm_mm_clu
+	}
+	if(`ei' == 3){
+		estimates restore iv_cmm_mm_fgls
+	}
+	if(`ei' == 4){
+		estimates restore iv_cmm_mm_hac
+	}
+
+	matrix coef_se_compare[1+(`ei'-1)*3,1] = _b[mm]
+	matrix coef_se_compare[1+(`ei'-1)*3,2] = _se[mm]
+	matrix coef_se_compare[2+(`ei'-1)*3,1] = _b[mm_ten_occ]
+	matrix coef_se_compare[2+(`ei'-1)*3,2] = _se[mm_ten_occ]
+	matrix coef_se_compare[3+(`ei'-1)*3,1] = _b[cmm]
+	matrix coef_se_compare[3+(`ei'-1)*3,2] = _se[cmm]
+}
+
+putexcel A1=matrix(coef_se_compare, names) using ${result}/table_${diminitls}_ref_1_2.xls, replace
 
 /*------------------------------------------------------------------------------------*/
 /* positive & negative mismatch */
 
 estimate clear
-estimate use ${result}/ols_mm_pos_neg.ster
-estimate store ols_mm_pos_neg
-estimate use ${result}/iv_mm_pos_neg.ster
-estimate store iv_mm_pos_neg
 
-estimate use ${result}/ols_mm_ten_pos_neg.ster
-estimate store ols_mm_ten_pos_neg
-estimate use ${result}/iv_mm_ten_pos_neg.ster
-estimate store iv_mm_ten_pos_neg
-
-estimate use ${result}/ols_cmm_mm_pos_neg.ster
-estimate store ols_cmm_mm_pos_neg
 estimate use ${result}/iv_cmm_mm_pos_neg.ster
 estimate store iv_cmm_mm_pos_neg
 estimate use ${result}/iv_cmm_mm_pos_neg_fe.ster
@@ -1559,10 +1518,6 @@ estimate store ols_cmm_mm_pos_neg_fe
 estimate use ${result}/iv_cmm_mm_pos_neg_fe.ster
 estimate store iv_cmm_mm_pos_neg_fe
 
-estimate use ${result}/iv_cmm_mm_pos_neg_boot.ster
-estimate store iv_cmm_mm_pos_neg_boot
-estimate use ${result}/iv_cmm_mm_pos_neg_fe_boot.ster
-estimate store iv_cmm_mm_pos_neg_fe_boot
 estimate use ${result}/iv_cmm_mm_pos_neg_rbst.ster
 estimate store iv_cmm_mm_pos_neg_rbst
 estimate use ${result}/iv_cmm_mm_pos_neg_fe_rbst.ster
@@ -1572,13 +1527,12 @@ estimate store iv_cmm_mm_pos_neg_fgls
 estimate use ${result}/iv_cmm_mm_pos_neg_fe_fgls.ster
 estimate store iv_cmm_mm_pos_neg_fe_fgls
 
-*FGLS
 esttab iv_cmm_mm_pos_neg_rbst iv_cmm_mm_pos_neg_fe_rbst iv_cmm_mm_pos_neg iv_cmm_mm_pos_neg_fe iv_cmm_mm_pos_neg_fgls iv_cmm_mm_pos_neg_fe_fgls ///
                    using ${result}/table_${diminitls}_${varcor}_${varmeth}_pos_neg_fgls.tex, b(4) ///
                    r2 nodepvars gaps label not nonotes substitute(\hline\hline \hline \hline "\hline  " "Standard" "${labtxt} standard" ///
                    "\sym{\sym{\dagger}}" "$^{\dagger}$" "\sym{\sym{*}}" "$^{*}$" "\sym{\sym{**}}" "$^{**}$") ///
 		   drop(*occ_1* *ind_1* ten* exp* oj $zlist _cons) ///
-		   mtitles("IV-RBST" "IV-FE-RBST" "IV-CLU" "IV-FE-CLU" "IV-FGLS" "IV-FE-FGLS") ///
+		   mtitles("IV-HAC" "IV-FE-HAV" "IV-CLU" "IV-FE-CLU" "IV-FGLS" "IV-FE-FGLS") ///
 		   order(mm_??? mm_???_ten_occ cmm_??? ) ///
                    star(\sym{*} 0.10 \sym{**} 0.05 \sym{***} 0.01) replace
 
@@ -1587,29 +1541,16 @@ esttab iv_cmm_mm_pos_neg_rbst iv_cmm_mm_pos_neg_fe_rbst iv_cmm_mm_pos_neg iv_cmm
 /* individual component mismatch */
 
 estimate clear
-estimate use ${result}/ols_ind_mm.ster
-estimate store ols_ind_mm
-estimate use ${result}/ols_ind_mm_ten.ster
-estimate store ols_ind_mm_ten
-estimate use ${result}/ols_ind_cmm_mm.ster
-estimate store ols_ind_cmm_mm
-estimate use ${result}/ols_ind_cmm_mm_fe.ster
-estimate store ols_ind_cmm_mm_fe
-
-estimate use ${result}/iv_ind_mm.ster
-estimate store iv_ind_mm
-estimate use ${result}/iv_ind_mm_ten.ster
-estimate store iv_ind_mm_ten
-estimate use ${result}/iv_ind_cmm_mm.ster
-estimate store iv_ind_cmm_mm
-estimate use ${result}/iv_ind_cmm_mm_fe.ster
-estimate store iv_ind_cmm_mm_fe
 
 
-estimate use ${result}/iv_ind_cmm_mm_boot.ster
-estimate store iv_ind_cmm_mm_boot
-estimate use ${result}/iv_ind_cmm_mm_fe_boot.ster
-estimate store iv_ind_cmm_mm_fe_boot
+estimate use ${result}/iv_ind_cmm_mm_clu.ster
+estimate store iv_ind_cmm_mm_clu
+estimate use ${result}/iv_ind_cmm_mm_fe_clu.ster
+estimate store iv_ind_cmm_mm_fe_clu
+estimate use ${result}/iv_ind_cmm_mm_hac.ster
+estimate store iv_ind_cmm_mm_hac
+estimate use ${result}/iv_ind_cmm_mm_fe_hac.ster
+estimate store iv_ind_cmm_mm_fe_hac
 estimate use ${result}/iv_ind_cmm_mm_fgls.ster
 estimate store iv_ind_cmm_mm_fgls
 estimate use ${result}/iv_ind_cmm_mm_fe_fgls.ster
