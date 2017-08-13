@@ -1108,49 +1108,83 @@ esttab iv_mm_young iv_mm_ten_young iv_cmm_mm_young ols_mm_young ols_mm_ten_young
                     star(\sym{*} 0.10 \sym{**} 0.05 \sym{***} 0.01) replace
 
 
-matrix ten_mm_cmm_105090_lt35 = J(3,3,0.)
-_pctile mm if lt35==1, p(0.1 0.5 0.9)
+matrix ten_mm_cmm_105090_lt35 = J(4,3,0.)
+_pctile mm if lt35==1, p(10 50 90)
 matrix ten_mm_cmm_105090_lt35[1,2] = r(r1)
 matrix ten_mm_cmm_105090_lt35[2,2] = r(r2)
 matrix ten_mm_cmm_105090_lt35[3,2] = r(r3)
+local mm10 = r(r1)
+local mm90 = r(r3)
+sum mm if lt35==1 & mm<=`mm10', meanonly
+matrix ten_mm_cmm_105090_lt35[1,2] = r(mean)
+sum mm if lt35==1 & mm>=`mm90', meanonly
+matrix ten_mm_cmm_105090_lt35[3,2] = r(mean)
+sum mm if lt35==1, meanonly
+matrix ten_mm_cmm_105090_lt35[4,2] = r(mean)
 
-_pctile tenure_occ if lt35==1, p(0.1 0.5 0.9)
-matrix ten_mm_cmm_105090_lt35[1,1] = r(r1)*ten_mm_cmm_105090_lt35[1,2]
+sum tenure_occ if lt35==1 & mm<=`mm10', meanonly
+matrix ten_mm_cmm_105090_lt35[1,1] = r(mean)*ten_mm_cmm_105090_lt35[1,2]
+_pctile tenure_occ if lt35==1, p(10 50 90)
 matrix ten_mm_cmm_105090_lt35[2,1] = r(r2)*ten_mm_cmm_105090_lt35[2,2]
-matrix ten_mm_cmm_105090_lt35[3,1] = r(r3)*ten_mm_cmm_105090_lt35[3,2]
+sum tenure_occ if lt35==1 & mm>=`mm90', meanonly
+matrix ten_mm_cmm_105090_lt35[3,1] = r(mean)*ten_mm_cmm_105090_lt35[3,2]
+sum tenure_occ if lt35==1, meanonly
+matrix ten_mm_cmm_105090_lt35[4,1] = r(mean)*ten_mm_cmm_105090_lt35[4,2]
 
-_pctile cmm if lt35==1, p(0.1 0.5 0.9)
-matrix ten_mm_cmm_105090_lt35[1,3] = r(r1)
-matrix ten_mm_cmm_105090_lt35[1,3] = r(r2)
-matrix ten_mm_cmm_105090_lt35[3,3] = r(r3)
+sum cmm if lt35==1 & mm<=`mm10', meanonly
+matrix ten_mm_cmm_105090_lt35[1,3] = r(mean)
+_pctile cmm if lt35==1, p(10 50 90)
+matrix ten_mm_cmm_105090_lt35[2,3] = r(r2)
+sum cmm if lt35==1 & mm>=`mm90', meanonly
+matrix ten_mm_cmm_105090_lt35[3,3] = r(mean)
+sum cmm if lt35==1, meanonly
+matrix ten_mm_cmm_105090_lt35[4,3] = r(mean)
 
 estimates restore iv_cmm_mm_young
 matrix b_lt35 = J(3,1,0.)
 matrix b_lt35[1,1] = _b[ mm_ten_occ ]+_b[ mm_ten_occ_lt35]
 matrix b_lt35[2,1] = _b[mm]+_b[mm_lt35]
 matrix b_lt35[3,1] = _b[cmm]+_b[cmm_lt35]
+matrix pred_wloss_lt35 = ten_mm_cmm_105090_lt35*b_lt35
 
-matrix pred_wloss_lt35 = (ten_mm_cmm_105090_lt35')*b_lt35
 
-matrix ten_mm_cmm_105090_ge35 = J(3,3,0.)
-_pctile tenure_occ if lt35==0, p(0.1 0.5 0.9)
-ten_mm_cmm_105090_ge35[1,1] = r(r1)
-ten_mm_cmm_105090_ge35[2,1] = r(r2)
-ten_mm_cmm_105090_ge35[3,1] = r(r3)
-_pctile mm if lt35==0, p(0.1 0.5 0.9)
-ten_mm_cmm_105090_ge35[1,2] = r(r1)
-ten_mm_cmm_105090_ge35[2,2] = r(r2)
-ten_mm_cmm_105090_ge35[3,2] = r(r3)
-_pctile cmm if lt35==0, p(0.1 0.5 0.9)
-ten_mm_cmm_105090_ge35[1,3] = r(r1)
-ten_mm_cmm_105090_ge35[1,3] = r(r2)
-ten_mm_cmm_105090_ge35[3,3] = r(r3)
+matrix ten_mm_cmm_105090_ge35 = J(4,3,0.)
+_pctile mm if lt35==1, p(10 50 90)
+matrix ten_mm_cmm_105090_ge35[1,2] = r(r1)
+matrix ten_mm_cmm_105090_ge35[2,2] = r(r2)
+matrix ten_mm_cmm_105090_ge35[3,2] = r(r3)
+local mm10 = r(r1)
+local mm90 = r(r3)
+sum mm if lt35==1 & mm<=`mm10', meanonly
+matrix ten_mm_cmm_105090_ge35[1,2] = r(mean)
+sum mm if lt35==1 & mm>=`mm90', meanonly
+matrix ten_mm_cmm_105090_ge35[3,2] = r(mean)
+sum mm if lt35==1, meanonly
+matrix ten_mm_cmm_105090_ge35[4,2] = r(mean)
 
+sum tenure_occ if lt35==1 & mm<=`mm10', meanonly
+matrix ten_mm_cmm_105090_ge35[1,1] = r(mean)*ten_mm_cmm_105090_ge35[1,2]
+_pctile tenure_occ if lt35==1, p(10 50 90)
+matrix ten_mm_cmm_105090_ge35[2,1] = r(r2)*ten_mm_cmm_105090_ge35[2,2]
+sum tenure_occ if lt35==1 & mm>=`mm90', meanonly
+matrix ten_mm_cmm_105090_ge35[3,1] = r(mean)*ten_mm_cmm_105090_ge35[3,2]
+sum tenure_occ if lt35==1, meanonly
+matrix ten_mm_cmm_105090_ge35[4,1] = r(mean)*ten_mm_cmm_105090_ge35[4,2]
+
+sum cmm if lt35==1 & mm<=`mm10', meanonly
+matrix ten_mm_cmm_105090_ge35[1,3] = r(mean)
+_pctile cmm if lt35==1, p(10 50 90)
+matrix ten_mm_cmm_105090_ge35[2,3] = r(r2)
+sum cmm if lt35==1 & mm>=`mm90', meanonly
+matrix ten_mm_cmm_105090_ge35[3,3] = r(mean)
+sum cmm if lt35==1, meanonly
+matrix ten_mm_cmm_105090_ge35[4,3] = r(mean)
 
 estimates restore iv_cmm_mm_young
 matrix b_ge35 = J(3,1,0.)
 matrix b_ge35[1,1] = _b[ mm_ten_occ ]
 matrix b_ge35[2,1] = _b[mm]
 matrix b_ge35[3,1] = _b[cmm]
+matrix pred_wloss_ge35 = ten_mm_cmm_105090_ge35*b_ge35
 
-matrix pred_wloss_ge35 = (ten_mm_cmm_105090_ge35')*b_ge35
+matrix pred_wloss_ge35 = ten_mm_cmm_105090_ge35*b_ge35
