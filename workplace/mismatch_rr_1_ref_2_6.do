@@ -1029,6 +1029,7 @@ gen mm_ten_occ_iv_lt35 = ten_occ_iv*mm *lt35
 label var mm_lt35 "Mismatch, $< 35$"
 label var cmm_lt35 "Cumul Mismatch, $< 35$"
 label var mm_ten_occ_lt35 "Mismatch $\times$ Occ Ten, $< 35$"
+label var lt35 "< 35"
 /* could do it all with <30
 gen lt30 = (age<30)
 gen mm_lt30 = mm*lt30
@@ -1040,25 +1041,25 @@ gen mm_ten_occ_iv_lt30 = ten_occ_iv*mm *lt30
 global xlist  ability_mean_ten_occ skill_mean_ten_occ $xlist_0
 global ivlist ability_mean_ten_occ_iv skill_mean_ten_occ_iv $ivlist_0
 
-xi: ivreg2 lwage mm mm_lt35 $xlist  $zlist ability_mean skill_mean i.ind_1d i.occ_1d , bw(2) robust
+xi: ivreg2 lwage mm mm_lt35 $xlist  $zlist lt35 ability_mean skill_mean i.ind_1d i.occ_1d , bw(2) robust
 estimate save ${result}/ols_mm_young.ster, replace
 
-xi: ivreg2 lwage mm mm_lt35 ($xlist  = $ivlist ) $zlist ability_mean skill_mean i.ind_1d i.occ_1d , bw(2) robust
+xi: ivreg2 lwage mm mm_lt35 ($xlist  = $ivlist ) $zlist  lt35 ability_mean skill_mean i.ind_1d i.occ_1d , bw(2) robust
 estimate save ${result}/iv_mm_young.ster, replace
 
 
 global xlist  mm_ten_occ mm_ten_occ_lt35 ability_mean_ten_occ skill_mean_ten_occ $xlist_0
 global ivlist mm_ten_occ_iv mm_ten_occ_iv_lt35 ability_mean_ten_occ_iv skill_mean_ten_occ_iv $ivlist_0
-xi: ivreg2 lwage mm mm_lt35 $xlist  $zlist ability_mean skill_mean i.ind_1d i.occ_1d , bw(2) robust
+xi: ivreg2 lwage mm mm_lt35 $xlist  $zlist  lt35 ability_mean skill_mean i.ind_1d i.occ_1d , bw(2) robust
 estimate save ${result}/ols_mm_ten_young.ster, replace
 
-xi: ivreg2 lwage mm mm_lt35 ($xlist  = $ivlist ) $zlist ability_mean skill_mean i.ind_1d i.occ_1d , bw(2) robust
+xi: ivreg2 lwage mm mm_lt35 ($xlist  = $ivlist ) $zlist lt35 ability_mean skill_mean i.ind_1d i.occ_1d , bw(2) robust
 estimate save ${result}/iv_mm_ten_young.ster, replace
 
-xi: ivreg2 lwage mm mm_lt35 cmm cmm_lt35 $xlist  $zlist ability_mean skill_mean i.ind_1d i.occ_1d , bw(2) robust
+xi: ivreg2 lwage mm mm_lt35 cmm cmm_lt35 $xlist  $zlist lt35 ability_mean skill_mean i.ind_1d i.occ_1d , bw(2) robust
 estimate save ${result}/ols_cmm_mm_young.ster, replace
 
-xi: ivreg2 lwage mm mm_lt35 cmm cmm_lt35 ($xlist  = $ivlist ) $zlist ability_mean skill_mean i.ind_1d i.occ_1d , bw(2) robust
+xi: ivreg2 lwage mm mm_lt35 cmm cmm_lt35 ($xlist  = $ivlist ) $zlist lt35 ability_mean skill_mean i.ind_1d i.occ_1d , bw(2) robust
 estimate save ${result}/iv_cmm_mm_young.ster, replace
 
 
@@ -1107,6 +1108,11 @@ esttab iv_mm_young iv_mm_ten_young iv_cmm_mm_young ols_mm_young ols_mm_ten_young
 		   order(mm mm_lt35 mm_ten_occ mm_ten_occ_lt35 cmm cmm_lt35 ability_mean ability_mean_ten_occ skill_mean skill_mean_ten_occ ten* exp* oj $zlist _cons) ///
                     star(\sym{*} 0.10 \sym{**} 0.05 \sym{***} 0.01) replace
 
+/*-----------------------------------------------------*/
+/*-----------------------------------------------------*/
+/* Implied effect */
+/*-----------------------------------------------------*/
+/*-----------------------------------------------------*/
 
 matrix ten_mm_cmm_105090_lt35 = J(4,3,0.)
 _pctile mm if lt35==1, p(10 50 90)
@@ -1149,35 +1155,35 @@ matrix pred_wloss_lt35 = ten_mm_cmm_105090_lt35*b_lt35
 
 
 matrix ten_mm_cmm_105090_ge35 = J(4,3,0.)
-_pctile mm if lt35==1, p(10 50 90)
+_pctile mm if lt35==0, p(10 50 90)
 matrix ten_mm_cmm_105090_ge35[1,2] = r(r1)
 matrix ten_mm_cmm_105090_ge35[2,2] = r(r2)
 matrix ten_mm_cmm_105090_ge35[3,2] = r(r3)
 local mm10 = r(r1)
 local mm90 = r(r3)
-sum mm if lt35==1 & mm<=`mm10', meanonly
+sum mm if lt35==0 & mm<=`mm10', meanonly
 matrix ten_mm_cmm_105090_ge35[1,2] = r(mean)
-sum mm if lt35==1 & mm>=`mm90', meanonly
+sum mm if lt35==0 & mm>=`mm90', meanonly
 matrix ten_mm_cmm_105090_ge35[3,2] = r(mean)
-sum mm if lt35==1, meanonly
+sum mm if lt35==0, meanonly
 matrix ten_mm_cmm_105090_ge35[4,2] = r(mean)
 
-sum tenure_occ if lt35==1 & mm<=`mm10', meanonly
+sum tenure_occ if lt35==0 & mm<=`mm10', meanonly
 matrix ten_mm_cmm_105090_ge35[1,1] = r(mean)*ten_mm_cmm_105090_ge35[1,2]
-_pctile tenure_occ if lt35==1, p(10 50 90)
+_pctile tenure_occ if lt35==0, p(10 50 90)
 matrix ten_mm_cmm_105090_ge35[2,1] = r(r2)*ten_mm_cmm_105090_ge35[2,2]
-sum tenure_occ if lt35==1 & mm>=`mm90', meanonly
+sum tenure_occ if lt35==0 & mm>=`mm90', meanonly
 matrix ten_mm_cmm_105090_ge35[3,1] = r(mean)*ten_mm_cmm_105090_ge35[3,2]
-sum tenure_occ if lt35==1, meanonly
+sum tenure_occ if lt35==0, meanonly
 matrix ten_mm_cmm_105090_ge35[4,1] = r(mean)*ten_mm_cmm_105090_ge35[4,2]
 
-sum cmm if lt35==1 & mm<=`mm10', meanonly
+sum cmm if lt35==0 & mm<=`mm10', meanonly
 matrix ten_mm_cmm_105090_ge35[1,3] = r(mean)
-_pctile cmm if lt35==1, p(10 50 90)
+_pctile cmm if lt35==0, p(10 50 90)
 matrix ten_mm_cmm_105090_ge35[2,3] = r(r2)
-sum cmm if lt35==1 & mm>=`mm90', meanonly
+sum cmm if lt35==0 & mm>=`mm90', meanonly
 matrix ten_mm_cmm_105090_ge35[3,3] = r(mean)
-sum cmm if lt35==1, meanonly
+sum cmm if lt35==0, meanonly
 matrix ten_mm_cmm_105090_ge35[4,3] = r(mean)
 
 estimates restore iv_cmm_mm_young
@@ -1188,3 +1194,25 @@ matrix b_ge35[3,1] = _b[cmm]
 matrix pred_wloss_ge35 = ten_mm_cmm_105090_ge35*b_ge35
 
 matrix pred_wloss_ge35 = ten_mm_cmm_105090_ge35*b_ge35
+
+
+/* Only current mismatch */
+
+matrix ten_mm_105090_lt35 = ten_mm_cmm_105090_lt35[1..4,1..2]
+
+estimate restore iv_mm_ten_young
+matrix b_lt35 = J(2,1,0.)
+matrix b_lt35[1,1] = _b[ mm_ten_occ ]+_b[ mm_ten_occ_lt35]
+matrix b_lt35[2,1] = _b[mm]+_b[mm_lt35]
+matrix pred_wloss_lt35 = ten_mm_105090_lt35*b_lt35
+
+
+matrix ten_mm_105090_ge35 = ten_mm_cmm_105090_ge35[1..4,1..2]
+
+estimates restore iv_mm_ten_young
+matrix b_ge35 = J(2,1,0.)
+matrix b_ge35[1,1] = _b[ mm_ten_occ ]
+matrix b_ge35[2,1] = _b[mm]
+
+matrix pred_wloss_ge35 = ten_mm_105090_ge35*b_ge35
+

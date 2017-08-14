@@ -23,7 +23,7 @@ global diminitls "vms_fgls"
 /*------------------------------------------------------------------------------------*/
 
 set more off
-use ${result}/yearly_02.dta, clear
+use ${data}/yearly_02.dta, clear
 
 /*------------------------------------------------------------------------------------*/
 
@@ -702,8 +702,8 @@ label var mm "Mismatch"
 label var mm_ten_occ "Mismatch $\times$ Occ Tenure"
 label var mm_neg "Negative Mismatch"
 label var mm_pos "Positive Mismatch"
-label var mm_neg_ten_occ "Pos. Mismatch $\times$ Occ Tenure"
-label var mm_pos_ten_occ "Neg. Mismatch $\times$ Occ Tenure"
+label var mm_neg_ten_occ "Neg. Mismatch $\times$ Occ Tenure"
+label var mm_pos_ten_occ "Pos. Mismatch $\times$ Occ Tenure"
 
 label var ability_mean "Worker Ability (Mean)"
 label var skill_mean "Occ Reqs (Mean)"
@@ -865,7 +865,7 @@ capture foreach i of local nlist{
 gen obs1 = id !=id[_n-1] & id==id[_n+1]
 
 
-save ${result}/yearly_03.dta, replace
+save ${data}/yearly_03.dta, replace
 
 /*------------------------------------------------------------------------------------*/
 /*------------------------------------------------------------------------------------*/
@@ -910,7 +910,7 @@ predict uhat, residuals
 reg uhat l.uhat, noc /*, fe  */
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist mm $zlist ability_mean skill_mean $xlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -938,6 +938,9 @@ forvalues iter=1/50{
 xi: reg lwage mm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d, vce(robust)
 estimate save ${result}/ols_mm_means_rbst.ster, replace
 
+xi: ivreg2 lwage mm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d, bw(2) robust
+estimate save ${result}/ols_mm_means_hac.ster, replace
+
 
 global xlist  ability_mean_ten_occ skill_mean_ten_occ $xlist_0
 global ivlist ability_mean_ten_occ_iv skill_mean_ten_occ_iv $ivlist_0
@@ -946,7 +949,7 @@ predict uhat, residuals
 reg uhat l.uhat, noc /*, fe  */
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist mm $zlist ability_mean skill_mean $xlist $ivlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -975,6 +978,9 @@ forvalues iter=1/50{
 xi: ivregress 2sls lwage mm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d, vce(robust)
 estimate save ${result}/iv_mm_means_rbst.ster, replace
 
+xi: ivreg2 lwage mm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d, bw(2) robust
+estimate save ${result}/iv_mm_means_hac.ster, replace
+
 
 /*------------------------------------------------------------------------------------*/
 /* mismatch with tenure */
@@ -985,7 +991,7 @@ predict uhat, residuals
 reg uhat l.uhat, noc /*, fe  */
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist mm $zlist ability_mean skill_mean $xlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1014,6 +1020,9 @@ forvalues iter=1/50{
 xi: reg lwage mm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d, vce(robust) 
 estimate save ${result}/ols_mm_ten_means_rbst.ster, replace
 
+xi: ivreg2 lwage mm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d, bw(2) robust
+estimate save ${result}/ols_mm_ten_means_hac.ster, replace
+
 
 global xlist  mm_ten_occ ability_mean_ten_occ skill_mean_ten_occ $xlist_0
 global ivlist mm_ten_occ_iv ability_mean_ten_occ_iv skill_mean_ten_occ_iv $ivlist_0
@@ -1022,11 +1031,10 @@ predict uhat, residuals
 reg uhat l.uhat, noc /*, fe  */
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist mm $zlist ability_mean skill_mean $xlist $ivlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
-*		replace `zv' = `zv'_R*(1-${rhohat}^2)^0.5 if obs1==1 & `zv'==.
 		_crcslbl `zv'_R `zv'
 	}
 	xi: ivregress 2sls lwage mm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d
@@ -1051,6 +1059,10 @@ forvalues iter=1/50{
 xi: ivregress 2sls lwage mm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d, vce(robust)
 estimate save ${result}/iv_mm_ten_means_rbst.ster, replace
 
+xi: ivreg2 lwage mm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d, robust bw(2)
+estimate save ${result}/iv_mm_ten_means_hac.ster, replace
+
+
 /*------------------------------------------------------------------------------------*/
 /* cumulative mismatch */
 
@@ -1060,7 +1072,7 @@ predict uhat, residuals
 reg uhat l.uhat, noc /*, fe  */
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist mm cmm $zlist ability_mean skill_mean $xlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1088,6 +1100,9 @@ forvalues iter=1/50{
 xi: reg lwage mm cmm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d, vce(robust)
 estimate save ${result}/ols_cmm_mm_means_rbst.ster, replace
 
+xi: ivreg2 lwage mm cmm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d, robust bw(2)
+estimate save ${result}/ols_cmm_mm_means_hac.ster, replace
+
 
 global xlist  mm_ten_occ ability_mean_ten_occ skill_mean_ten_occ $xlist_0
 global ivlist mm_ten_occ_iv ability_mean_ten_occ_iv skill_mean_ten_occ_iv $ivlist_0
@@ -1096,11 +1111,10 @@ predict uhat, residuals
 reg uhat l.uhat, noc /*, fe  */
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist mm cmm $zlist ability_mean skill_mean $xlist $ivlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
-*		replace `zv' = `zv'_R*(1-${rhohat}^2)^0.5 if obs1==1 & `zv'==.
 		_crcslbl `zv'_R `zv'
 	}
 	xi: ivregress 2sls lwage mm cmm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d
@@ -1125,6 +1139,9 @@ forvalues iter=1/50{
 xi: ivregress 2sls lwage mm cmm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d, vce(robust)
 estimate save ${result}/iv_cmm_mm_means_rbst.ster, replace
 
+xi: ivreg2 lwage mm cmm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d, robust bw(2)
+estimate save ${result}/iv_cmm_mm_means_hac.ster, replace
+
 /*------------------------------------------------------------------------------------*/
 /* mismatch with positive & negative components */
 
@@ -1134,11 +1151,10 @@ predict uhat, residuals
 reg uhat l.uhat , noc
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist mm_pos mm_neg $zlist $xlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
-*		replace `zv' = `zv'_R*(1-${rhohat}^2)^0.5 if obs1==1 & `zv'==.
 		_crcslbl `zv'_R `zv'
 	}
 	xi: reg lwage mm_pos mm_neg $xlist $zlist i.ind_1d i.occ_1d
@@ -1162,6 +1178,9 @@ forvalues iter=1/50{
 xi: reg lwage mm_pos mm_neg $xlist $zlist i.ind_1d i.occ_1d, vce(robust)
 estimate save ${result}/ols_mm_means_pos_neg_rbst.ster, replace
 
+xi: ivreg2 lwage mm_pos mm_neg $xlist $zlist i.ind_1d i.occ_1d, robust bw(2)
+estimate save ${result}/ols_mm_means_pos_neg_hac.ster, replace
+
 
 global xlist  $xlist_0
 global ivlist $ivlist_0
@@ -1170,11 +1189,10 @@ predict uhat, residuals
 reg uhat l.uhat , noc
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui  forvalues iter=1/50{
 	qui foreach zv of varlist mm_pos mm_neg $zlist $xlist $ivlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
-*		replace `zv' = `zv'_R*(1-${rhohat}^2)^0.5 if obs1==1 & `zv'==.
 		_crcslbl `zv'_R `zv'
 	}
 	xi: ivregress 2sls lwage mm_pos mm_neg ($xlist = $ivlist) $zlist i.ind_1d i.occ_1d
@@ -1198,6 +1216,9 @@ forvalues iter=1/50{
 xi: ivregress 2sls lwage mm_pos mm_neg ($xlist = $ivlist) $zlist i.ind_1d i.occ_1d, vce(robust)
 estimate save ${result}/iv_mm_means_pos_neg_rbst.ster, replace
 
+xi: ivreg2 lwage mm_pos mm_neg ($xlist = $ivlist) $zlist i.ind_1d i.occ_1d, robust bw(2)
+estimate save ${result}/iv_mm_means_pos_neg_hac.ster, replace
+
 
 /*------------------------------------------------------------------------------------*/
 /* mismatch with positive & negative components with tenure */
@@ -1208,7 +1229,7 @@ predict uhat, residuals
 reg uhat l.uhat , noc
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist mm_pos mm_neg $zlist $xlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1236,6 +1257,9 @@ forvalues iter=1/50{
 xi: reg lwage mm_pos_ten_occ mm_neg_ten_occ mm_pos mm_neg $xlist $zlist i.ind_1d i.occ_1d, vce(robust)
 estimate save ${result}/ols_mm_ten_means_pos_neg_rbst.ster, replace
 
+xi: ivreg2 lwage mm_pos_ten_occ mm_neg_ten_occ mm_pos mm_neg $xlist $zlist i.ind_1d i.occ_1d, robust bw(2)
+estimate save ${result}/ols_mm_ten_means_pos_neg_hac.ster, replace
+
 
 global xlist  mm_pos_ten_occ mm_neg_ten_occ $xlist_0
 global ivlist mm_pos_ten_occ_iv mm_neg_ten_occ_iv $ivlist_0
@@ -1244,7 +1268,7 @@ predict uhat, residuals
 reg uhat l.uhat , noc
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist mm_pos mm_neg $zlist $xlist $ivlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1272,6 +1296,9 @@ forvalues iter=1/50{
 xi: ivregress 2sls lwage mm_pos mm_neg ($xlist = $ivlist) $zlist i.ind_1d i.occ_1d, vce(robust)
 estimate save ${result}/iv_mm_ten_means_pos_neg_rbst.ster, replace
 
+xi: ivreg2 lwage mm_pos mm_neg ($xlist = $ivlist) $zlist i.ind_1d i.occ_1d, robust bw(2)
+estimate save ${result}/iv_mm_ten_means_pos_neg_hac.ster, replace
+
 
 /*------------------------------------------------------------------------------------*/
 /* cumulative mismatch with positive & negative components */
@@ -1282,7 +1309,7 @@ predict uhat, residuals
 reg uhat l.uhat , noc
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist mm_pos mm_neg cmm_pos cmm_neg $zlist $xlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1310,6 +1337,9 @@ forvalues iter=1/50{
 xi: reg lwage mm_pos mm_neg cmm_pos cmm_neg $xlist $zlist i.ind_1d i.occ_1d, vce(robust)
 estimate save ${result}/ols_cmm_mm_means_pos_neg_rbst.ster, replace
 
+xi: ivreg2 lwage mm_pos mm_neg cmm_pos cmm_neg $xlist $zlist i.ind_1d i.occ_1d, robust bw(2)
+estimate save ${result}/ols_cmm_mm_means_pos_neg_hac.ster, replace
+
 
 global xlist  mm_pos_ten_occ mm_neg_ten_occ $xlist_0
 global ivlist mm_pos_ten_occ_iv mm_neg_ten_occ_iv $ivlist_0
@@ -1318,7 +1348,7 @@ predict uhat, residuals
 reg uhat l.uhat , noc
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist mm_pos mm_neg cmm_pos cmm_neg $zlist $xlist $ivlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1346,6 +1376,9 @@ forvalues iter=1/50{
 xi: ivregress 2sls lwage mm_pos mm_neg cmm_pos cmm_neg ($xlist = $ivlist) $zlist i.ind_1d i.occ_1d, vce(robust)
 estimate save ${result}/iv_cmm_mm_means_pos_neg_rbst.ster, replace
 
+xi: ivreg2 lwage mm_pos mm_neg cmm_pos cmm_neg ($xlist = $ivlist) $zlist i.ind_1d i.occ_1d, robust bw(2)
+estimate save ${result}/iv_cmm_mm_means_pos_neg_hac.ster, replace
+
 
 /*------------------------------------------------------------------------------------*/
 /* individual component mismatch */
@@ -1356,7 +1389,7 @@ predict uhat, residuals
 reg uhat l.uhat , noc
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist absmm_?? $zlist ability_?? skill_??  $xlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1384,6 +1417,9 @@ forvalues iter=1/50{
 xi: reg lwage absmm_?? $xlist $zlist ability_?? skill_?? i.ind_1d i.occ_1d , vce(robust)
 estimate save ${result}/ols_ind_mm_means_rbst.ster, replace
 
+xi: ivreg2 lwage absmm_?? $xlist $zlist ability_?? skill_?? i.ind_1d i.occ_1d , robust bw(2)
+estimate save ${result}/ols_ind_mm_means_hac.ster, replace
+
 
 global xlist  ability_??_ten_occ skill_??_ten_occ $xlist_0
 global ivlist ability_??_ten_occ_iv skill_??_ten_occ_iv $ivlist_0
@@ -1392,7 +1428,7 @@ predict uhat, residuals
 reg uhat l.uhat , noc
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist absmm_?? $zlist ability_?? skill_??  $xlist $ivlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1420,6 +1456,8 @@ forvalues iter=1/50{
 xi: ivregress 2sls lwage absmm_?? ($xlist = $ivlist) $zlist ability_?? skill_?? i.ind_1d i.occ_1d , vce(robust)
 estimate save ${result}/iv_ind_mm_means_rbst.ster, replace
 
+xi: ivreg2 lwage absmm_?? ($xlist = $ivlist) $zlist ability_?? skill_?? i.ind_1d i.occ_1d , robust bw(2)
+estimate save ${result}/iv_ind_mm_means_hac.ster, replace
 
 /*------------------------------------------------------------------------------------*/
 /* individual component mismatch with tenure */
@@ -1430,7 +1468,7 @@ predict uhat, residuals
 reg uhat l.uhat , noc
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist absmm_?? $zlist ability_?? skill_??  $xlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1458,6 +1496,9 @@ forvalues iter=1/50{
 xi: reg lwage absmm_?? $xlist $zlist ability_?? skill_?? i.ind_1d i.occ_1d, vce(robust)
 estimate save ${result}/ols_ind_mm_ten_means_rbst.ster, replace
 
+xi: ivreg2 lwage absmm_?? $xlist $zlist ability_?? skill_?? i.ind_1d i.occ_1d, robust bw(2)
+estimate save ${result}/ols_ind_mm_ten_means_hac.ster, replace
+
 
 global xlist  absmm_??_ten_occ ability_??_ten_occ skill_??_ten_occ $xlist_0
 global ivlist absmm_??_ten_occ_iv ability_??_ten_occ_iv skill_??_ten_occ_iv $ivlist_0
@@ -1466,7 +1507,7 @@ predict uhat, residuals
 reg uhat l.uhat , noc
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist absmm_?? $zlist ability_?? skill_??  $xlist $ivlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1494,6 +1535,9 @@ forvalues iter=1/50{
 xi: ivregress 2sls lwage absmm_?? ($xlist = $ivlist) $zlist ability_?? skill_?? i.ind_1d i.occ_1d , vce(robust)
 estimate save ${result}/iv_ind_mm_ten_means_rbst.ster, replace
 
+xi: ivreg2 lwage absmm_?? ($xlist = $ivlist) $zlist ability_?? skill_?? i.ind_1d i.occ_1d , robust bw(2)
+estimate save ${result}/iv_ind_mm_ten_means_hac.ster, replace
+
 
 /*------------------------------------------------------------------------------------*/
 /* individual component cumulative mismatch */
@@ -1504,7 +1548,7 @@ predict uhat, residuals
 reg uhat l.uhat , noc
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist cmm_aa cmm_bb cmm_cc absmm_?? $zlist ability_?? skill_??  $xlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1532,6 +1576,9 @@ forvalues iter=1/50{
 xi: reg lwage cmm_aa cmm_bb cmm_cc absmm_?? $xlist $zlist ability_?? skill_?? i.ind_1d i.occ_1d , vce(robust)
 estimate save ${result}/ols_ind_cmm_mm_means_rbst.ster, replace
 
+xi: ivreg2 lwage cmm_aa cmm_bb cmm_cc absmm_?? $xlist $zlist ability_?? skill_?? i.ind_1d i.occ_1d , robust bw(2)
+estimate save ${result}/ols_ind_cmm_mm_means_hac.ster, replace
+
 
 global xlist  absmm_??_ten_occ ability_??_ten_occ skill_??_ten_occ $xlist_0 
 global ivlist absmm_??_ten_occ_iv ability_??_ten_occ_iv skill_??_ten_occ_iv $ivlist_0
@@ -1540,7 +1587,7 @@ predict uhat, residuals
 reg uhat l.uhat , noc
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist cmm_aa cmm_bb cmm_cc absmm_?? $zlist ability_?? skill_??  $xlist $ivlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1568,6 +1615,9 @@ forvalues iter=1/50{
 xi: ivregress 2sls lwage cmm_aa cmm_bb cmm_cc absmm_?? ($xlist = $ivlist) $zlist ability_?? skill_?? i.ind_1d i.occ_1d , vce(robust)
 estimate save ${result}/iv_ind_cmm_mm_means_rbst.ster, replace
 
+xi: ivreg2 lwage cmm_aa cmm_bb cmm_cc absmm_?? ($xlist = $ivlist) $zlist ability_?? skill_?? i.ind_1d i.occ_1d , robust bw(2)
+estimate save ${result}/iv_ind_cmm_mm_means_hac.ster, replace
+
 
 /*------------------------------------------------------------------------------------*/
 /*------------------------------------------------------------------------------------*/
@@ -1585,7 +1635,7 @@ predict uhat, e
 reg uhat l.uhat, noc /*, fe  */
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist mm $zlist ability_mean skill_mean $xlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1613,6 +1663,9 @@ forvalues iter=1/50{
 xi: xtreg lwage mm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d, vce(robust) fe
 estimate save ${result}/ols_mm_fe_rbst.ster, replace
 
+xi: xtivreg2 lwage mm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d, robust bw(2) fe
+estimate save ${result}/ols_mm_fe_hac.ster, replace
+
 
 global xlist  ability_mean_ten_occ skill_mean_ten_occ $xlist_0
 global ivlist ability_mean_ten_occ_iv skill_mean_ten_occ_iv $ivlist_0
@@ -1621,7 +1674,7 @@ predict uhat, e
 reg uhat l.uhat, noc /*, fe  */
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist mm $zlist ability_mean skill_mean $xlist $ivlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1650,6 +1703,8 @@ forvalues iter=1/50{
 xi: xtivreg2 lwage mm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d, fe robust
 estimate save ${result}/iv_mm_fe_rbst.ster, replace
 
+xi: xtivreg2 lwage mm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d, fe robust bw(2)
+estimate save ${result}/iv_mm_fe_hac.ster, replace
 
 /*------------------------------------------------------------------------------------*/
 /* mismatch with tenure & fixed effects */
@@ -1660,7 +1715,7 @@ predict uhat, e
 reg uhat l.uhat, noc /*, fe  */
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist mm $zlist ability_mean skill_mean $xlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1689,6 +1744,9 @@ forvalues iter=1/50{
 xi: xtreg lwage mm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d, vce(robust) fe
 estimate save ${result}/ols_mm_ten_fe_rbst.ster, replace
 
+xi: xtivreg2 lwage mm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d, robust bw(2) fe
+estimate save ${result}/ols_mm_ten_fe_hac.ster, replace
+
 
 global xlist  mm_ten_occ ability_mean_ten_occ skill_mean_ten_occ $xlist_0
 global ivlist mm_ten_occ_iv ability_mean_ten_occ_iv skill_mean_ten_occ_iv $ivlist_0
@@ -1697,7 +1755,7 @@ predict uhat, e
 reg uhat l.uhat, noc /*, fe  */
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist mm $zlist ability_mean skill_mean $xlist $ivlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1726,6 +1784,10 @@ forvalues iter=1/50{
 xi: xtivreg2 lwage mm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d, robust fe
 estimate save ${result}/iv_mm_ten_fe_rbst.ster, replace
 
+xi: xtivreg2 lwage mm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d, robust bw(2) fe
+estimate save ${result}/iv_mm_ten_fe_hac.ster, replace
+
+
 /*------------------------------------------------------------------------------------*/
 /* cumulative mismatch */
 
@@ -1735,7 +1797,7 @@ predict uhat, e
 reg uhat l.uhat, noc /*, fe  */
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist mm cmm $zlist ability_mean skill_mean $xlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1760,8 +1822,11 @@ forvalues iter=1/50{
 	}
 	drop *_R uhat
 }
-xi: reg lwage mm cmm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d, vce(robust)
+xi: xtreg lwage mm cmm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d, vce(robust) fe
 estimate save ${result}/ols_cmm_mm_fe_rbst.ster, replace
+
+xi: xtivreg2 lwage mm cmm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d, fe robust bw(2)
+estimate save ${result}/ols_cmm_mm_fe_hac.ster, replace
 
 
 global xlist  mm_ten_occ ability_mean_ten_occ skill_mean_ten_occ $xlist_0
@@ -1771,7 +1836,7 @@ predict uhat, e
 reg uhat l.uhat, noc /*, fe  */
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist mm cmm $zlist ability_mean skill_mean $xlist $ivlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1797,8 +1862,11 @@ forvalues iter=1/50{
 	}
 	drop *_R uhat
 }
-xi: xtivreg lwage mm cmm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d, vce(robust) fe
+xi: xtivreg2 lwage mm cmm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d, robust fe
 estimate save ${result}/iv_cmm_mm_fe_rbst.ster, replace
+
+xi: xtivreg2 lwage mm cmm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d, robust bw(2) fe
+estimate save ${result}/iv_cmm_mm_fe_hac.ster, replace
 
 
 /*------------------------------------------------------------------------------------*/
@@ -1848,7 +1916,7 @@ esttab iv_mm_means iv_mm_ten_means iv_cmm_mm_means ols_mm_means ols_mm_ten_means
 		   order(mm mm_ten_occ cmm ability_mean ability_mean_ten_occ skill_mean skill_mean_ten_occ ten* exp* oj $zlist _cons) ///
                    star(* 0.10 ** 0.05 *** 0.01) replace
   
-/* comparison to robust*/
+/* comparison to robust and HAC*/
 
 estimate use ${result}/iv_mm_means_rbst.ster
 estimate store iv_mm_means_rbst
@@ -1857,12 +1925,20 @@ estimate store iv_mm_ten_means_rbst
 estimate use ${result}/iv_cmm_mm_means_rbst.ster
 estimate store iv_cmm_mm_means_rbst
 
-esttab iv_mm_means iv_mm_ten_means iv_cmm_mm_means iv_mm_means_rbst iv_mm_ten_means_rbst iv_cmm_mm_means_rbst ///
-			   using ${result}/table_ivgls_${diminitls}.tex, b(4) ///
+estimate use ${result}/iv_mm_means_hac.ster
+estimate store iv_mm_means_hac
+estimate use ${result}/iv_mm_ten_means_hac.ster
+estimate store iv_mm_ten_means_hac
+estimate use ${result}/iv_cmm_mm_means_hac.ster
+estimate store iv_cmm_mm_means_hac
+
+
+esttab iv_cmm_mm_means iv_cmm_mm_means_hac iv_cmm_mm_means_rbst ///
+			   using ${result}/table_ivgls_hac_${diminitls}.tex, b(4) ///
 			   r2 nodepvars gaps not label nonotes substitute(\hline\hline \hline \hline "\hline  " "Standard" "Robust standard" ///
 			   "\sym{\sym{\dagger}}" "$^{\dagger}$" "\sym{\sym{*}}" "$^{*}$" "\sym{\sym{**}}" "$^{**}$") ///
 	   drop(_I* ten* exp* oj $zlist _cons) ///
-	   mtitles("IV-GLS" "IV-GLS" "IV-GLS" "IV-RBST" "IV-RBST" "IV-RBST") ///
+	   mtitles("IV-GLS" "IV-HAC" "IV-RBST") ///
 	   order(mm mm_ten_occ cmm ability_mean ability_mean_ten_occ skill_mean skill_mean_ten_occ) ///
 			   star(* 0.10 ** 0.05 *** 0.01) replace
 
@@ -1914,13 +1990,22 @@ estimate store iv_ind_mm_ten_means_rbst
 estimate use ${result}/iv_ind_cmm_mm_means_rbst.ster
 estimate store iv_ind_cmm_mm_means_rbst
 
-/* comparison to robust */
-esttab iv_ind_mm_means iv_ind_mm_ten_means iv_ind_cmm_mm_means iv_ind_mm_means_rbst iv_ind_mm_ten_means_rbst iv_ind_cmm_mm_means_rbst  ///
+
+estimate use ${result}/iv_ind_mm_means_hac.ster
+estimate store iv_ind_mm_means_hac
+estimate use ${result}/iv_ind_mm_ten_means_hac.ster
+estimate store iv_ind_mm_ten_means_hac
+estimate use ${result}/iv_ind_cmm_mm_means_hac.ster
+estimate store iv_ind_cmm_mm_means_hac
+
+
+/* comparison to robust and HAC */
+esttab iv_ind_cmm_mm_means iv_ind_cmm_mm_means_hac iv_ind_cmm_mm_means_rbst ///
                    using ${result}/table_ivgls_${diminitls}_ind.tex, b(4) ///
                    r2 nodepvars gaps label not nonotes substitute(\hline\hline \hline \hline "\hline  " "Standard" "Robust standard" ///
                    "\sym{\sym{\dagger}}" "$^{\dagger}$" "\sym{\sym{*}}" "$^{*}$" "\sym{\sym{**}}" "$^{**}$") ///
 		   drop(_I* ten* exp* oj $zlist _cons) ///
-		   mtitles("IV-GLS" "IV-GLS" "IV-GLS" "IV-RBST" "IV-RBST" "IV-RBST") ///
+		   mtitles("IV-GLS" "IV-HAC" "IV-RBST" ) ///
 		   order(absmm_aa absmm_bb absmm_cc absmm_aa_t* absmm_bb_t* absmm_cc_t* cmm_aa cmm_bb cmm_cc ability_?? ability_??_* skill_?? skill_??_*) ///
                    star(* 0.10 ** 0.05 *** 0.01) replace
 				   
@@ -1944,7 +2029,7 @@ estimate use ${result}/iv_cmm_mm_means_pos_neg.ster
 estimate store iv_cmm_mm_means_pos_neg
 
 /* tex */
-esttab iv_mm_means_pos_neg iv_mm_ten_means_pos_neg iv_cmm_mm_means_pos_neg ols_mm_means_pos_neg_pos_neg ols_mm_ten_means_pos_neg ols_cmm_mm_means ///
+esttab iv_mm_means_pos_neg iv_mm_ten_means_pos_neg iv_cmm_mm_means_pos_neg ols_mm_means_pos_neg ols_mm_ten_means_pos_neg ols_cmm_mm_means_pos_neg ///
                    using ${result}/table_${diminitls}_pos_neg.tex, b(4) ///
                    r2 nodepvars gaps label not nonotes substitute(\hline\hline \hline \hline "\hline  " "Standard" "Robust standard" ///
                    "\sym{\sym{\dagger}}" "$^{\dagger}$" "\sym{\sym{*}}" "$^{*}$" "\sym{\sym{**}}" "$^{**}$") ///
@@ -1973,77 +2058,26 @@ estimate store iv_mm_ten_pos_neg_rbst
 estimate use ${result}/iv_cmm_mm_means_pos_neg_rbst.ster
 estimate store iv_cmm_mm_pos_neg_rbst
 
+estimate use ${result}/iv_mm_means_pos_neg_hac.ster
+estimate store iv_mm_pos_neg_hac
+estimate use ${result}/iv_mm_ten_means_pos_neg_hac.ster
+estimate store iv_mm_ten_pos_neg_hac
+estimate use ${result}/iv_cmm_mm_means_pos_neg_hac.ster
+estimate store iv_cmm_mm_pos_neg_hac
+
+
 /* comparison to robust */
-esttab iv_mm_means_pos_neg iv_mm_ten_means_pos_neg iv_cmm_mm_means_pos_neg iv_mm_pos_neg_rbst iv_mm_ten_pos_neg_rbst iv_cmm_mm_pos_neg_rbst  ///
+esttab  iv_cmm_mm_means_pos_neg iv_cmm_mm_pos_neg_hac iv_cmm_mm_pos_neg_rbst ///
                    using ${result}/table_ivgls_${diminitls}_pos_neg.tex, b(4) ///
                    r2 nodepvars gaps label not nonotes substitute(\hline\hline \hline \hline "\hline  " "Standard" "Robust standard" ///
                    "\sym{\sym{\dagger}}" "$^{\dagger}$" "\sym{\sym{*}}" "$^{*}$" "\sym{\sym{**}}" "$^{**}$") ///
 		   drop(_I* ten* exp* oj $zlist _cons) ///
-		   mtitles("IV-GLS" "IV-GLS" "IV-GLS" "IV-RBST" "IV-RBST" "IV-RBST") ///
+		   mtitles("IV-GLS" "IV-HAC" "IV-RBST" ) ///
 		   order(mm_??? mm_???_ten_occ cmm_???) ///
                    star(* 0.10 ** 0.05 *** 0.01) replace
-		   
 
 
-/*------------------------------------------------------------------------------------*/
-/* individual component mismatch */
-
-estimate clear
-estimate use ${result}/ols_ind_mm_means.ster
-estimate store ols_ind_mm_means
-estimate use ${result}/ols_ind_mm_ten_means.ster
-estimate store ols_ind_mm_ten_means
-estimate use ${result}/ols_ind_cmm_mm_means.ster
-estimate store ols_ind_cmm_mm_means
-
-estimate use ${result}/iv_ind_mm_means.ster
-estimate store iv_ind_mm_means
-estimate use ${result}/iv_ind_mm_ten_means.ster
-estimate store iv_ind_mm_ten_means
-estimate use ${result}/iv_ind_cmm_mm_means.ster
-estimate store iv_ind_cmm_mm_means
-
-/* tex */
-esttab iv_ind_mm_means iv_ind_mm_ten_means iv_ind_cmm_mm_means ols_ind_mm_means ols_ind_mm_ten_means ols_ind_cmm_mm_means ///
-                   using ${result}/table_${diminitls}_ind.tex, b(4) ///
-                   r2 nodepvars gaps label not nonotes substitute(\hline\hline \hline \hline "\hline  " "Standard" "Robust standard" ///
-                   "\sym{\sym{\dagger}}" "$^{\dagger}$" "\sym{\sym{*}}" "$^{*}$" "\sym{\sym{**}}" "$^{**}$") ///
-		   drop(_I* ten* exp* oj $zlist _cons) ///
-		   mtitles("IV" "IV" "IV" "OLS" "OLS" "OLS") ///
-		   order(absmm_aa absmm_bb absmm_cc absmm_aa_t* absmm_bb_t* absmm_cc_t* cmm_aa cmm_bb cmm_cc ability_?? ability_??_* skill_?? skill_??_*) ///
-                   star(* 0.10 ** 0.05 *** 0.01) replace
-		   
-esttab iv_ind_mm_means iv_ind_mm_ten_means iv_ind_cmm_mm_means ols_ind_mm_means ols_ind_mm_ten_means ols_ind_cmm_mm_means ///
-                   using ${result}/table_apx_${diminitls}_ind.tex, b(4) se(4) ///
-                   r2 nodepvars nogaps label longtable substitute(\hline\hline \hline \hline "\hline  " ///
-		   "Standard errors in parentheses" "All regressions include occupation and industry dummies." ///
-		   "\sym{\sym{\dagger}} \(p<0.10\), \sym{\sym{*}} \(p<0.05\), \sym{\sym{**}} \(p<0.01\)" "Robust standard errors in parentheses. \sym{\sym{\dagger}} \(p<0.10\), \sym{\sym{*}} \(p<0.05\), \sym{\sym{**}} \(p<0.01\)." ///
-                   "\sym{\sym{\dagger}}" "$^{\dagger}$" "\sym{\sym{*}}" "$^{*}$" "\sym{\sym{**}}" "$^{**}$") ///
-		   drop(_I*) ///
-		   mtitles("IV" "IV" "IV" "OLS" "OLS" "OLS") ///
-		   title("Wage Regression with Mismatch by Components (Full Results)") ///
-		   order(absmm_aa absmm_bb absmm_cc absmm_aa_t* absmm_bb_t* absmm_cc_t* cmm_aa cmm_bb cmm_cc ability_?? ability_??_* skill_?? skill_??_* ten* exp* oj $zlist _cons) ///
-                   star(* 0.10 ** 0.05 *** 0.01) replace
-
-
-estimate use ${result}/iv_ind_mm_means_rbst.ster
-estimate store iv_ind_mm_means_rbst
-estimate use ${result}/iv_ind_mm_ten_means_rbst.ster
-estimate store iv_ind_mm_ten_means_rbst
-estimate use ${result}/iv_ind_cmm_mm_means_rbst.ster
-estimate store iv_ind_cmm_mm_means_rbst
-
-/* comparison to robust */
-esttab iv_ind_mm_means iv_ind_mm_ten_means iv_ind_cmm_mm_means iv_ind_mm_means_rbst iv_ind_mm_ten_means_rbst iv_ind_cmm_mm_means_rbst  ///
-                   using ${result}/table_ivgls_${diminitls}_ind.tex, b(4) ///
-                   r2 nodepvars gaps label not nonotes substitute(\hline\hline \hline \hline "\hline  " "Standard" "Robust standard" ///
-                   "\sym{\sym{\dagger}}" "$^{\dagger}$" "\sym{\sym{*}}" "$^{*}$" "\sym{\sym{**}}" "$^{**}$") ///
-		   drop(_I* ten* exp* oj $zlist _cons) ///
-		   mtitles("IV-GLS" "IV-GLS" "IV-GLS" "IV-RBST" "IV-RBST" "IV-RBST") ///
-		   order(absmm_aa absmm_bb absmm_cc absmm_aa_t* absmm_bb_t* absmm_cc_t* cmm_aa cmm_bb cmm_cc ability_?? ability_??_* skill_?? skill_??_*) ///
-                   star(* 0.10 ** 0.05 *** 0.01) replace
-				   
-				   
+	   
 /*------------------------------------------------------------------------------------*/
 /* fixed effect mismatch */
 
@@ -2063,17 +2097,17 @@ estimate use ${result}/iv_cmm_mm_fe.ster
 estimate store iv_cmm_mm_fe
 
 /* tex */
-esttab iv_mm_means_pos_neg iv_mm_ten_means_pos_neg iv_cmm_mm_means_pos_neg ols_mm_means_pos_neg_pos_neg ols_mm_ten_means_pos_neg ols_cmm_mm_means ///
-                   using ${result}/table_${diminitls}_pos_neg.tex, b(4) ///
+esttab iv_mm_fe iv_mm_ten_fe iv_cmm_mm_fe ols_mm_fe ols_mm_ten_fe ols_cmm_mm_fe ///
+                   using ${result}/table_${diminitls}_fe.tex, b(4) ///
                    r2 nodepvars gaps label not nonotes substitute(\hline\hline \hline \hline "\hline  " "Standard" "Robust standard" ///
                    "\sym{\sym{\dagger}}" "$^{\dagger}$" "\sym{\sym{*}}" "$^{*}$" "\sym{\sym{**}}" "$^{**}$") ///
 		   drop(_I* ten* exp* oj $zlist _cons) ///
 		   mtitles("IV" "IV" "IV" "OLS" "OLS" "OLS") ///
-		   order(mm_??? mm_???_ten_occ cmm_???) ///
+		   order(mm mm_ten_occ cmm ability_mean ability_mean_ten_occ skill_mean skill_mean_ten_occ) ///
                    star(* 0.10 ** 0.05 *** 0.01) replace
 		   
-esttab iv_mm_means_pos_neg iv_mm_ten_means_pos_neg iv_cmm_mm_means_pos_neg ols_mm_means_pos_neg ols_mm_ten_means_pos_neg ols_cmm_mm_means_pos_neg ///
-                   using ${result}/table_apx_${diminitls}_pos_neg.tex, b(4) se(4) ///
+esttab iv_mm_fe iv_mm_ten_fe iv_cmm_mm_fe ols_mm_fe ols_mm_ten_fe ols_cmm_mm_fe ///
+                   using ${result}/table_apx_${diminitls}_fe.tex, b(4) se(4) ///
                    r2 nodepvars nogaps label longtable substitute(\hline\hline \hline \hline "\hline  " ///
 		   "Standard errors in parentheses" "All regressions include occupation and industry dummies." ///
 		   "\sym{\sym{\dagger}} \(p<0.10\), \sym{\sym{*}} \(p<0.05\), \sym{\sym{**}} \(p<0.01\)" "Robust standard errors in parentheses. \sym{\sym{\dagger}} \(p<0.10\), \sym{\sym{*}} \(p<0.05\), \sym{\sym{**}} \(p<0.01\)." ///
@@ -2081,7 +2115,7 @@ esttab iv_mm_means_pos_neg iv_mm_ten_means_pos_neg iv_cmm_mm_means_pos_neg ols_m
 		   drop(_I*) ///
 		   mtitles("IV" "IV" "IV" "OLS" "OLS" "OLS") ///
 		   title("Wage Regression with Mismatch by Components (Full Results)") ///
-		   order(mm_??? mm_???_ten_occ cmm_??? ten* exp* oj $zlist _cons) ///
+		   order(mm mm_ten_occ cmm ability_mean ability_mean_ten_occ skill_mean skill_mean_ten_occ ten* exp* oj $zlist _cons) ///
                    star(* 0.10 ** 0.05 *** 0.01) replace
 
 
@@ -2092,15 +2126,89 @@ estimate store iv_mm_ten_fe_rbst
 estimate use ${result}/iv_cmm_mm_fe_rbst.ster
 estimate store iv_cmm_mm_fe_rbst
 
+estimate use ${result}/iv_mm_fe_hac.ster
+estimate store iv_mm_fe_hac
+estimate use ${result}/iv_mm_ten_fe_hac.ster
+estimate store iv_mm_ten_fe_hac
+estimate use ${result}/iv_cmm_mm_fe_hac.ster
+estimate store iv_cmm_mm_fe_hac
+
+
 /* comparison to robust */
-esttab iv_mm_fe iv_mm_ten_fe iv_cmm_mm_fe iv_mm_fe_rbst iv_mm_ten_fe_rbst iv_cmm_mm_fe_rbst  ///
+esttab iv_cmm_mm_fe  iv_cmm_mm_fe_hac iv_cmm_mm_fe_rbst  ///
                    using ${result}/table_ivgls_${diminitls}_fe.tex, b(4) ///
                    r2 nodepvars gaps label not nonotes substitute(\hline\hline \hline \hline "\hline  " "Standard" "Robust standard" ///
                    "\sym{\sym{\dagger}}" "$^{\dagger}$" "\sym{\sym{*}}" "$^{*}$" "\sym{\sym{**}}" "$^{**}$") ///
 		   drop(_I* ten* exp* oj $zlist _cons) ///
-		   mtitles("IV-GLS" "IV-GLS" "IV-GLS" "IV-RBST" "IV-RBST" "IV-RBST") ///
+		   mtitles("IV-GLS" "IV-HAC" "IV-RBST") ///
 		   order(mm_??? mm_???_ten_occ cmm_???) ///
                    star(* 0.10 ** 0.05 *** 0.01) replace
 		   
 
+
+/*------------------------------------------------------------------------------------*/		   
+/* predicted effect of mismatch on wages */
+
+estimate clear
+estimate use ${result}/iv_cmm_mm_means.ster
+matrix pred_mm_pt = J(5,4,0.0)
+matrix pred_mm_sd = J(5,4,0.0)
+matrix eV = e(V)
+* should replace this with name-based indexing
+local mi = 13
+local mti = 1
+
+_pctile mm, p(10 30 50 70 90)
+local p90 = r(r5)
+local p70 = r(r4)
+local p50 = r(r3)
+local p30 = r(r2)
+local p10 = r(r1)
+
+forvalues tt = 1/3 {
+	matrix pred_mm_pt[1,`tt'] = _b["mm"]*`p90'+_b["mm_ten_occ"]*`p90'*`tt'*5
+	matrix pred_mm_pt[2,`tt'] = _b["mm"]*`p70'+_b["mm_ten_occ"]*`p70'*`tt'*5
+	matrix pred_mm_pt[3,`tt'] = _b["mm"]*`p50'+_b["mm_ten_occ"]*`p50'*`tt'*5
+	matrix pred_mm_pt[4,`tt'] = _b["mm"]*`p30'+_b["mm_ten_occ"]*`p30'*`tt'*5
+	matrix pred_mm_pt[5,`tt'] = _b["mm"]*`p10'+_b["mm_ten_occ"]*`p10'*`tt'*5
+
+	matrix pred_mm_sd[1,`tt'] = (eV[`mi',`mi']*`p90'^2+ eV[`mti',`mti']*(`p90'*`tt'*5)^2 + 2*eV[`mi',`mti']*`p90'*(`p90'*`tt'*5))^.5 
+	matrix pred_mm_sd[2,`tt'] = (eV[`mi',`mi']*`p70'^2+ eV[`mti',`mti']*(`p70'*`tt'*5)^2 + 2*eV[`mi',`mti']*`p70'*(`p70'*`tt'*5))^.5 
+	matrix pred_mm_sd[3,`tt'] = (eV[`mi',`mi']*`p50'^2+ eV[`mti',`mti']*(`p50'*`tt'*5)^2 + 2*eV[`mi',`mti']*`p50'*(`p50'*`tt'*5))^.5 
+	matrix pred_mm_sd[4,`tt'] = (eV[`mi',`mi']*`p30'^2+ eV[`mti',`mti']*(`p30'*`tt'*5)^2 + 2*eV[`mi',`mti']*`p30'*(`p30'*`tt'*5))^.5 
+	matrix pred_mm_sd[5,`tt'] = (eV[`mi',`mi']*`p10'^2+ eV[`mti',`mti']*(`p10'*`tt'*5)^2 + 2*eV[`mi',`mti']*`p10'*(`p10'*`tt'*5))^.5 
+}
+
+_pctile cmm, p(10 30 50 70 90)
+local p90 = r(r5)
+local p70 = r(r4)
+local p50 = r(r3)
+local p30 = r(r2)
+local p10 = r(r1)
+
+matrix pred_mm_pt[1,4] = _b["cmm"]*`p90'
+matrix pred_mm_pt[2,4] = _b["cmm"]*`p70'
+matrix pred_mm_pt[3,4] = _b["cmm"]*`p50'
+matrix pred_mm_pt[4,4] = _b["cmm"]*`p30'
+matrix pred_mm_pt[5,4] = _b["cmm"]*`p10'
+
+matrix pred_mm_sd[1,4] = _se["cmm"]*`p90'
+matrix pred_mm_sd[2,4] = _se["cmm"]*`p70'
+matrix pred_mm_sd[3,4] = _se["cmm"]*`p50'
+matrix pred_mm_sd[4,4] = _se["cmm"]*`p30'
+matrix pred_mm_sd[5,4] = _se["cmm"]*`p10'
+
+matrix pred_mm_pt_sd = J(10,4,0.0)
+forvalues pi = 1/5{
+	forvalues tt = 1/4{
+		local ri = (`pi'-1)*2+1
+		matrix pred_mm_pt_sd[`ri',`tt'] = pred_mm_pt[`pi',`tt']
+		local ri = (`pi')*2
+		matrix pred_mm_pt_sd[`ri',`tt'] = pred_mm_sd[`pi',`tt']
+	}
+}
+
+matrix colnames pred_mm_pt_sd = "MM_5_Years" "MM_10_Years" "MM_15_Years" "Cumul_MM"
+matrix rownames pred_mm_pt_sd = "90_Percentile" "90_Percentile" "70_Percentile" "70_Percentile" "50_Percentile" "50_Percentile" "30_Percentile" "30_Percentile" "10_Percentile" "10_Percentile"
+putexcel A1=matrix(pred_mm_pt_sd, names) using ${result}/table_${diminitls}_pred_mm.xls, replace
 
