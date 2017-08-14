@@ -2141,7 +2141,7 @@ esttab iv_cmm_mm_fe  iv_cmm_mm_fe_hac iv_cmm_mm_fe_rbst  ///
                    "\sym{\sym{\dagger}}" "$^{\dagger}$" "\sym{\sym{*}}" "$^{*}$" "\sym{\sym{**}}" "$^{**}$") ///
 		   drop(_I* ten* exp* oj $zlist _cons) ///
 		   mtitles("IV-GLS" "IV-HAC" "IV-RBST") ///
-		   order(mm_??? mm_???_ten_occ cmm_???) ///
+		   order(mm mm_ten_occ cmm ability_mean ability_mean_ten_occ skill_mean skill_mean_ten_occ) ///
                    star(* 0.10 ** 0.05 *** 0.01) replace
 		   
 

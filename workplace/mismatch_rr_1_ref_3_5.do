@@ -1092,11 +1092,11 @@ predict uhat, residuals
 reg uhat l.uhat, noc /*, fe  */
 global rhohat = _b["L.uhat"]
 drop uhat
-forvalues iter=1/50{
+qui forvalues iter=1/50{
 	qui foreach zv of varlist mm cmm $zlist ability_mean skill_mean $xlist $ivlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
-		replace `zv' = `zv'_R*(1-${rhohat}^2)^0.5 if obs1==1 & `zv'==.
+*		replace `zv' = `zv'_R*(1-${rhohat}^2)^0.5 if obs1==1 & `zv'==.
 		_crcslbl `zv'_R `zv'
 	}
 	xi: ivregress 2sls lwage mm cmm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d /*[aw=inv_omega] */
@@ -1155,7 +1155,6 @@ forvalues iter=1/50{
 	qui foreach zv of varlist mm cmm  skill_mean  $xlist $ivlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
-		replace `zv' = `zv'_R*(1-${rhohat}^2)^0.5 if obs1==1 & `zv'==.
 		_crcslbl `zv'_R `zv'
 	}
 	xtivreg2 lwage mm cmm  skill_mean _Iind_1d_* _Iocc_1d_* ($xlist = $ivlist), fe /*[aw=inv_omega] */
