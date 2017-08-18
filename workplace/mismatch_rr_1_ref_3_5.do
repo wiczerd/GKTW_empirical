@@ -25,7 +25,7 @@ global varmeth   "asymp"/* how to compute variance, may be boot or asymp */
 /*------------------------------------------------------------------------------------*/
 
 set more off
-use ${result}/yearly_02.dta, clear
+use ${data}/yearly_02.dta, clear
 
 /*------------------------------------------------------------------------------------*/
 
@@ -959,7 +959,7 @@ capture foreach i of local nlist{
 	local ll = `ll' + 1
 }
 
-save ${result}/yearly_03.dta, replace
+save ${data}/yearly_03.dta, replace
 
 
 /*------------------------------------------------------------------------------------*/
@@ -1394,7 +1394,7 @@ qui forvalues iter=1/50{
 	predict uhat, residuals
 	reg uhat l.uhat, noc /*, fe  */
 	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){
-		qui foreach zv of varlist mm_dim cmm $zlist ability_mean skill_mean $xlist lwage{
+		qui foreach zv of varlist mm_dim cmm_dim $zlist ability_mean skill_mean $xlist lwage{
 			replace `zv'= `zv'_R
 		}
 		drop *_R uhat
@@ -1443,12 +1443,6 @@ qui forvalues iter=1/50{
 }
 
 
-xi: reg lwage mm_dim cmm_dim $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d, vce(${vcetxt})
-estimate save ${result}/ols_cmm_mm_dim.ster, replace
-
-xi: ivregress 2sls lwage mm_dim cmm_dim ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d, vce(${vcetxt})
-estimate save ${result}/iv_cmm_mm_dim.ster, replace
-
 
 
 /*-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-*/		   
@@ -1463,22 +1457,31 @@ estimate store iv_mm_ten_dim
 estimate use ${result}/iv_cmm_mm_dim.ster
 estimate store iv_cmm_mm_dim
 
-estimate use ${result}/iv_mm.ster
+estimate use ${result}/iv_mm_means.ster
 estimate store iv_mm
-estimate use ${result}/iv_mm_ten.ster
+estimate use ${result}/iv_mm_ten_means.ster
 estimate store iv_mm_ten
-estimate use ${result}/iv_cmm_mm.ster
+estimate use ${result}/iv_cmm_mm_means.ster
 estimate store iv_cmm_mm
 
+esttab iv_mm_dim iv_mm_ten_dim iv_cmm_mm_dim iv_mm iv_mm_ten iv_cmm_mm  ///
+                   using ${result}/table_${diminitls}_dim.tex, b(4) ///
+                   r2 nodepvars gaps label not nonotes substitute(\hline\hline \hline \hline "\hline  " "Standard" "Robust standard" ///
+                   "\sym{\sym{\dagger}}" "$^{\dagger}$" "\sym{\sym{*}}" "$^{*}$" "\sym{\sym{**}}" "$^{**}$") ///
+		   drop(_I* ten* exp* oj $zlist _cons) ///
+		   mtitles("IV" "IV" "IV" "IV-Base" "IV-Base" "IV-Base") ///
+		   order(mm mm_dim mm_ten_occ mm_dim_ten_occ cmm cmm_dim ability_mean ability_mean_ten_occ skill_mean skill_mean_ten_occ ) ///
+                   star(* 0.10 ** 0.05 *** 0.01) replace
+		   
 
 		   
 esttab iv_mm_dim iv_mm_ten_dim iv_cmm_mm_dim iv_mm iv_mm_ten iv_cmm_mm ///
                    using ${result}/table_apx_${diminitls}_dim.tex, b(4) ///
                     r2 nodepvars gaps not label nonotes substitute(\hline\hline \hline \hline "\hline  " "Standard" "${labtxt} standard" ///
                    "\sym{\sym{\dagger}}" "$^{\dagger}$" "\sym{\sym{*}}" "$^{*}$" "\sym{\sym{**}}" "$^{**}$" "\sym{\sym{***}}" "$^{***}$") ///
-		   drop(_I* ten* exp* oj $zlist _cons) ///
+		   drop(_I* _cons) ///
 		   mtitles("IV" "IV" "IV" "IV-Base" "IV-Base" "IV-Base") ///
-		   order(mm mm_dim mm_ten_occ mm_ten_occ_dim cmm cmm_dim ability_mean ability_mean_ten_occ skill_mean skill_mean_ten_occ ten* exp* oj $zlist _cons) ///
+		   order(mm mm_dim mm_ten_occ mm_dim_ten_occ  cmm cmm_dim ability_mean ability_mean_ten_occ skill_mean skill_mean_ten_occ ten* exp* oj $zlist _cons) ///
                    star(\sym{*} 0.10 \sym{**} 0.05 \sym{***} 0.01) replace
 
 
