@@ -709,8 +709,8 @@ label var mm "Mismatch"
 label var mm_ten_occ "Mismatch $\times$ Occ Tenure"
 label var mm_neg "Negative Mismatch"
 label var mm_pos "Positive Mismatch"
-label var mm_neg_ten_occ "Pos. Mismatch $\times$ Occ Tenure"
-label var mm_pos_ten_occ "Neg. Mismatch $\times$ Occ Tenure"
+label var mm_neg_ten_occ "Neg. Mismatch $\times$ Occ Tenure"
+label var mm_pos_ten_occ "Pos. Mismatch $\times$ Occ Tenure"
 
 label var ability_mean "Worker Ability (Mean)"
 label var skill_mean "Occ Reqs (Mean)"
@@ -925,110 +925,600 @@ estimate save ${result}/bench_iv.ster, replace
 /* mismatch */
 
 global xlist  ability_mean_ten_occ skill_mean_ten_occ $xlist_0
-xi: ivreg2 learn mm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d , robust bw(2)
-estimate save ${result}/ols_mm_means.ster, replace
+xi: reg learn mm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d
+predict uhat, residuals
+reg uhat l.uhat, noc /*, fe  */
+global rhohat = _b["L.uhat"]
+drop uhat
+qui forvalues iter=1/50{
+	qui foreach zv of varlist mm $zlist ability_mean skill_mean $xlist learn{
+		gen `zv'_R =`zv'
+		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
+		_crcslbl `zv'_R `zv'
+	}
+	xi: reg learn mm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d
+	estimate save ${result}/ols_mm_means.ster, replace
+	predict uhat, residuals
+	reg uhat l.uhat, noc /*, fe  */
+	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){
+		qui foreach zv of varlist mm $zlist ability_mean skill_mean $xlist learn{
+			replace `zv'= `zv'_R
+		}
+		drop *_R uhat
+		continue, break
+	}
+	global rhohat = _b["L.uhat"]*0.1 + 0.9*${rhohat}
+	
+	qui foreach zv of varlist mm $zlist ability_mean skill_mean $xlist learn{
+		replace `zv'= `zv'_R
+	}
+	drop *_R uhat
+}
 
 global xlist  ability_mean_ten_occ skill_mean_ten_occ $xlist_0
 global ivlist ability_mean_ten_occ_iv skill_mean_ten_occ_iv $ivlist_0
-xi: ivreg2 learn mm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d , robust bw(2)
-estimate save ${result}/iv_mm_means.ster, replace
+ivregress 2sls learn mm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d
+predict uhat, residuals
+reg uhat l.uhat, noc /*, fe  */
+global rhohat = _b["L.uhat"]
+drop uhat
+qui forvalues iter=1/50{
+	qui foreach zv of varlist mm $zlist ability_mean skill_mean $xlist $ivlist learn{
+		gen `zv'_R =`zv'
+		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
+		_crcslbl `zv'_R `zv'
+	}
+	xi: ivregress 2sls learn mm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d
+	estimate save ${result}/iv_mm_means.ster, replace
+
+	predict uhat, residuals
+	reg uhat l.uhat, noc /*, fe  */
+	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){
+		qui foreach zv of varlist mm $zlist ability_mean skill_mean $xlist $ivlist learn{
+			replace `zv'= `zv'_R
+		}
+		drop *_R uhat
+		continue, break
+	}
+	global rhohat = _b["L.uhat"]*0.1 + 0.9*${rhohat}
+	
+	qui foreach zv of varlist mm $zlist ability_mean skill_mean $xlist $ivlist learn{
+		replace `zv'= `zv'_R
+	}
+	drop *_R uhat
+}
 
 /*------------------------------------------------------------------------------------*/
 /* mismatch with tenure */
 
 global xlist  mm_ten_occ ability_mean_ten_occ skill_mean_ten_occ $xlist_0
-xi: ivreg2 learn mm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d , robust bw(2)
-estimate save ${result}/ols_mm_ten_means.ster, replace
+xi: reg learn mm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d 
+predict uhat, residuals
+reg uhat l.uhat, noc /*, fe  */
+global rhohat = _b["L.uhat"]
+drop uhat
+qui forvalues iter=1/50{
+	qui foreach zv of varlist mm $zlist ability_mean skill_mean $xlist learn{
+		gen `zv'_R =`zv'
+		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
+		_crcslbl `zv'_R `zv'
+	}
+	xi: reg learn mm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d 
+	estimate save ${result}/ols_mm_ten_means.ster, replace
+
+	predict uhat, residuals
+	reg uhat l.uhat, noc /*, fe  */
+	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){
+		qui foreach zv of varlist mm $zlist ability_mean skill_mean $xlist learn{
+			replace `zv'= `zv'_R
+		}
+		drop *_R uhat
+		continue, break
+	}
+	global rhohat = _b["L.uhat"]*0.1 + 0.9*${rhohat}
+	
+	qui foreach zv of varlist mm $zlist ability_mean skill_mean $xlist learn{
+		replace `zv'= `zv'_R
+	}
+	drop *_R uhat
+}
 
 global xlist  mm_ten_occ ability_mean_ten_occ skill_mean_ten_occ $xlist_0
 global ivlist mm_ten_occ_iv ability_mean_ten_occ_iv skill_mean_ten_occ_iv $ivlist_0
-xi: ivreg2 learn mm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d , robust bw(2)
-estimate save ${result}/iv_mm_ten_means.ster, replace
+ivregress 2sls learn mm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d
+predict uhat, residuals
+reg uhat l.uhat, noc /*, fe  */
+global rhohat = _b["L.uhat"]
+drop uhat
+qui forvalues iter=1/50{
+	qui foreach zv of varlist mm $zlist ability_mean skill_mean $xlist $ivlist learn{
+		gen `zv'_R =`zv'
+		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
+		_crcslbl `zv'_R `zv'
+	}
+	xi: ivregress 2sls learn mm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d
+	estimate save ${result}/iv_mm_ten_means.ster, replace
 
-/*------------------------------------------------------------------------------------*/
-/* mismatch with positive & negative components */
-
-global xlist  $xlist_0
-xi: ivreg2 learn mm_pos mm_neg $xlist $zlist i.ind_1d i.occ_1d, robust bw(2)
-estimate save ${result}/ols_mm_means_pos_neg.ster, replace
-
-global xlist  $xlist_0
-global ivlist $ivlist_0
-xi: ivreg2 learn mm_pos mm_neg ($xlist = $ivlist) $zlist i.ind_1d i.occ_1d , robust bw(2)
-estimate save ${result}/iv_mm_means_pos_neg.ster, replace
-
-/*------------------------------------------------------------------------------------*/
-/* mismatch with positive & negative components with tenure */
-
-global xlist  mm_pos_ten_occ mm_neg_ten_occ $xlist_0
-xi: ivreg2 learn mm_pos mm_neg $xlist $zlist i.ind_1d i.occ_1d, robust bw(2)
-estimate save ${result}/ols_mm_ten_means_pos_neg.ster, replace
-
-global xlist  mm_pos_ten_occ mm_neg_ten_occ $xlist_0
-global ivlist mm_pos_ten_occ_iv mm_neg_ten_occ_iv $ivlist_0
-xi: ivreg2 learn mm_pos mm_neg ($xlist = $ivlist) $zlist i.ind_1d i.occ_1d , robust bw(2)
-estimate save ${result}/iv_mm_ten_means_pos_neg.ster, replace
+	predict uhat, residuals
+	reg uhat l.uhat, noc /*, fe  */
+	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){
+		qui foreach zv of varlist mm $zlist ability_mean skill_mean $xlist $ivlist learn{
+			replace `zv'= `zv'_R
+		}
+		drop *_R uhat
+		continue, break
+	}
+	global rhohat = _b["L.uhat"]*0.1 + 0.9*${rhohat}
+	
+	qui foreach zv of varlist mm $zlist ability_mean skill_mean $xlist $ivlist learn{
+		replace `zv'= `zv'_R
+	}
+	drop *_R uhat
+}
 
 /*------------------------------------------------------------------------------------*/
 /* cumulative mismatch */
 
 global xlist  mm_ten_occ ability_mean_ten_occ skill_mean_ten_occ $xlist_0
-xi: ivreg2 learn mm cmm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d, robust bw(2)
-estimate save ${result}/ols_cmm_mm_means.ster, replace
+xi: reg learn mm cmm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d
+predict uhat, residuals
+reg uhat l.uhat, noc /*, fe  */
+global rhohat = _b["L.uhat"]
+drop uhat
+qui forvalues iter=1/50{
+	qui foreach zv of varlist mm cmm $zlist ability_mean skill_mean $xlist learn{
+		gen `zv'_R =`zv'
+		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
+		_crcslbl `zv'_R `zv'
+	}
+	xi: reg learn mm cmm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d
+	estimate save ${result}/ols_cmm_mm_means.ster, replace
+	predict uhat, residuals
+	reg uhat l.uhat, noc /*, fe  */
+	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){
+		qui foreach zv of varlist mm cmm $zlist ability_mean skill_mean $xlist learn{
+			replace `zv'= `zv'_R
+		}
+		drop *_R uhat
+		continue, break
+	}
+	global rhohat = _b["L.uhat"]*0.1 + 0.9*${rhohat}
+	
+	qui foreach zv of varlist mm cmm $zlist ability_mean skill_mean $xlist learn{
+		replace `zv'= `zv'_R
+	}
+	drop *_R uhat
+}
 
 global xlist  mm_ten_occ ability_mean_ten_occ skill_mean_ten_occ $xlist_0
 global ivlist mm_ten_occ_iv ability_mean_ten_occ_iv skill_mean_ten_occ_iv $ivlist_0
-xi: ivreg2 learn mm cmm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d, robust bw(2)
-estimate save ${result}/iv_cmm_mm_means.ster, replace
+ivregress 2sls learn mm cmm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d
+predict uhat, residuals
+reg uhat l.uhat, noc /*, fe  */
+global rhohat = _b["L.uhat"]
+drop uhat
+qui forvalues iter=1/50{
+	qui foreach zv of varlist mm cmm $zlist ability_mean skill_mean $xlist $ivlist learn{
+		gen `zv'_R =`zv'
+		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
+		_crcslbl `zv'_R `zv'
+	}
+	xi: ivregress 2sls learn mm cmm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d
+	estimate save ${result}/iv_cmm_mm_means.ster, replace
 
+	predict uhat, residuals
+	reg uhat l.uhat, noc /*, fe  */
+	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){
+		qui foreach zv of varlist mm cmm $zlist ability_mean skill_mean $xlist $ivlist learn{
+			replace `zv'= `zv'_R
+		}
+		drop *_R uhat
+		continue, break
+	}
+	global rhohat = _b["L.uhat"]*0.1 + 0.9*${rhohat}
+	
+	qui foreach zv of varlist mm cmm $zlist ability_mean skill_mean $xlist $ivlist learn{
+		replace `zv'= `zv'_R
+	}
+	drop *_R uhat
+}
+
+global xlist  $xlist_0
+xi: reg learn mm_pos mm_neg $xlist $zlist i.ind_1d i.occ_1d
+predict uhat, residuals
+reg uhat l.uhat , noc
+global rhohat = _b["L.uhat"]
+drop uhat
+qui forvalues iter=1/50{
+	qui foreach zv of varlist mm_pos mm_neg $zlist $xlist learn{
+		gen `zv'_R =`zv'
+		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
+		_crcslbl `zv'_R `zv'
+	}
+	xi: reg learn mm_pos mm_neg $xlist $zlist i.ind_1d i.occ_1d
+	estimate save ${result}/ols_mm_means_pos_neg.ster, replace
+	predict uhat, residuals
+	reg uhat l.uhat , noc
+	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){
+		qui foreach zv of varlist mm_pos mm_neg $zlist $xlist learn{
+			replace `zv'= `zv'_R
+		}
+		drop *_R uhat
+		continue, break
+	}
+	global rhohat = _b["L.uhat"]*0.1 + 0.9*${rhohat}
+	
+	qui foreach zv of varlist mm_pos mm_neg $zlist $xlist learn{
+		replace `zv'= `zv'_R
+	}
+	drop *_R uhat
+}
+
+global xlist  $xlist_0
+global ivlist $ivlist_0
+xi: ivregress 2sls learn mm_pos mm_neg ($xlist = $ivlist) $zlist i.ind_1d i.occ_1d
+predict uhat, residuals
+reg uhat l.uhat , noc
+global rhohat = _b["L.uhat"]
+drop uhat
+qui  forvalues iter=1/50{
+	qui foreach zv of varlist mm_pos mm_neg $zlist $xlist $ivlist learn{
+		gen `zv'_R =`zv'
+		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
+		_crcslbl `zv'_R `zv'
+	}
+	xi: ivregress 2sls learn mm_pos mm_neg ($xlist = $ivlist) $zlist i.ind_1d i.occ_1d
+	estimate save ${result}/iv_mm_means_pos_neg.ster, replace
+	predict uhat, residuals
+	reg uhat l.uhat , noc
+	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){
+		qui foreach zv of varlist mm_pos mm_neg $zlist $xlist $ivlist learn{
+			replace `zv'= `zv'_R
+		}
+		drop *_R uhat
+		continue, break
+	}
+	global rhohat = _b["L.uhat"]*0.1 + 0.9*${rhohat}
+	
+	qui foreach zv of varlist mm_pos mm_neg $zlist $xlist $ivlist learn{
+		replace `zv'= `zv'_R
+	}
+	drop *_R uhat
+}
+/*------------------------------------------------------------------------------------*/
+/* mismatch with positive & negative components with tenure */
+
+global xlist  mm_pos_ten_occ mm_neg_ten_occ $xlist_0
+xi: reg learn mm_pos mm_neg $xlist $zlist i.ind_1d i.occ_1d
+predict uhat, residuals
+reg uhat l.uhat , noc
+global rhohat = _b["L.uhat"]
+drop uhat
+qui forvalues iter=1/50{
+	qui foreach zv of varlist mm_pos mm_neg $zlist $xlist learn{
+		gen `zv'_R =`zv'
+		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
+		_crcslbl `zv'_R `zv'
+	}
+	xi: reg learn mm_pos mm_neg $xlist $zlist i.ind_1d i.occ_1d
+	estimate save ${result}/ols_mm_ten_means_pos_neg.ster, replace
+	predict uhat, residuals
+	reg uhat l.uhat , noc
+	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){
+		qui foreach zv of varlist mm_pos mm_neg $zlist $xlist learn{
+			replace `zv'= `zv'_R
+		}
+		drop *_R uhat
+		continue, break
+	}
+	global rhohat = _b["L.uhat"]*0.1 + 0.9*${rhohat}
+	
+	qui foreach zv of varlist mm_pos mm_neg $zlist $xlist learn{
+		replace `zv'= `zv'_R
+	}
+	drop *_R uhat
+}
+
+global xlist  mm_pos_ten_occ mm_neg_ten_occ $xlist_0
+global ivlist mm_pos_ten_occ_iv mm_neg_ten_occ_iv $ivlist_0
+xi: ivregress 2sls learn mm_pos mm_neg ($xlist = $ivlist) $zlist i.ind_1d i.occ_1d
+predict uhat, residuals
+reg uhat l.uhat , noc
+global rhohat = _b["L.uhat"]
+drop uhat
+qui forvalues iter=1/50{
+	qui foreach zv of varlist mm_pos mm_neg $zlist $xlist $ivlist learn{
+		gen `zv'_R =`zv'
+		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
+		_crcslbl `zv'_R `zv'
+	}
+	xi: ivregress 2sls learn mm_pos mm_neg ($xlist = $ivlist) $zlist i.ind_1d i.occ_1d
+	estimate save ${result}/iv_mm_ten_means_pos_neg.ster, replace
+	predict uhat, residuals
+	reg uhat l.uhat , noc
+	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){
+		qui foreach zv of varlist mm_pos mm_neg $zlist $xlist $ivlist learn{
+			replace `zv'= `zv'_R
+		}
+		drop *_R uhat
+		continue, break
+	}
+	global rhohat = _b["L.uhat"]*0.1 + 0.9*${rhohat}
+	
+	qui foreach zv of varlist mm_pos mm_neg $zlist $xlist $ivlist learn{
+		replace `zv'= `zv'_R
+	}
+	drop *_R uhat
+}
 /*------------------------------------------------------------------------------------*/
 /* cumulative mismatch with positive & negative components */
 
 global xlist  mm_pos_ten_occ mm_neg_ten_occ $xlist_0
-xi: ivreg2 learn mm_pos mm_neg cmm_pos cmm_neg $xlist $zlist i.ind_1d i.occ_1d, robust bw(2)
-estimate save ${result}/ols_cmm_mm_means_pos_neg.ster, replace
+xi: reg learn mm_pos mm_neg cmm_pos cmm_neg $xlist $zlist i.ind_1d i.occ_1d
+predict uhat, residuals
+reg uhat l.uhat , noc
+global rhohat = _b["L.uhat"]
+drop uhat
+qui forvalues iter=1/50{
+	qui foreach zv of varlist mm_pos mm_neg cmm_pos cmm_neg $zlist $xlist learn{
+		gen `zv'_R =`zv'
+		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
+		_crcslbl `zv'_R `zv'
+	}
+	xi: reg learn mm_pos mm_neg cmm_pos cmm_neg $xlist $zlist i.ind_1d i.occ_1d
+	estimate save ${result}/ols_cmm_mm_means_pos_neg.ster, replace
+	predict uhat, residuals
+	reg uhat l.uhat , noc
+	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){
+		qui foreach zv of varlist mm_pos mm_neg cmm_pos cmm_neg $zlist $xlist learn{
+			replace `zv'= `zv'_R
+		}
+		drop *_R uhat
+		continue, break
+	}
+	global rhohat = _b["L.uhat"]*0.1 + 0.9*${rhohat}
+	
+	qui foreach zv of varlist mm_pos mm_neg cmm_pos cmm_neg $zlist $xlist learn{
+		replace `zv'= `zv'_R
+	}
+	drop *_R uhat
+}
 
 global xlist  mm_pos_ten_occ mm_neg_ten_occ $xlist_0
 global ivlist mm_pos_ten_occ_iv mm_neg_ten_occ_iv $ivlist_0
-xi: ivreg2 learn mm_pos mm_neg cmm_pos cmm_neg ($xlist = $ivlist) $zlist i.ind_1d i.occ_1d, robust bw(2)
-estimate save ${result}/iv_cmm_mm_means_pos_neg.ster, replace
+xi: ivregress 2sls learn mm_pos mm_neg cmm_pos cmm_neg ($xlist = $ivlist) $zlist i.ind_1d i.occ_1d
+predict uhat, residuals
+reg uhat l.uhat , noc
+global rhohat = _b["L.uhat"]
+drop uhat
+qui forvalues iter=1/50{
+	qui foreach zv of varlist mm_pos mm_neg cmm_pos cmm_neg $zlist $xlist $ivlist learn{
+		gen `zv'_R =`zv'
+		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
+		_crcslbl `zv'_R `zv'
+	}
+	xi: ivregress 2sls learn mm_pos mm_neg cmm_pos cmm_neg ($xlist = $ivlist) $zlist i.ind_1d i.occ_1d
+	estimate save ${result}/iv_cmm_mm_means_pos_neg.ster, replace
+	predict uhat, residuals
+	reg uhat l.uhat , noc
+	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){
+		qui foreach zv of varlist mm_pos mm_neg cmm_pos cmm_neg $zlist $xlist $ivlist learn{
+			replace `zv'= `zv'_R
+		}
+		drop *_R uhat
+		continue, break
+	}
+	global rhohat = _b["L.uhat"]*0.1 + 0.9*${rhohat}
+	
+	qui foreach zv of varlist mm_pos mm_neg cmm_pos cmm_neg $zlist $xlist $ivlist learn{
+		replace `zv'= `zv'_R
+	}
+	drop *_R uhat
+}
 
 /*------------------------------------------------------------------------------------*/
 /* individual component mismatch */
 
 global xlist  ability_??_ten_occ skill_??_ten_occ $xlist_0
-xi: ivreg2 learn absmm_?? $xlist $zlist ability_?? skill_?? i.ind_1d i.occ_1d , robust bw(2)
-estimate save ${result}/ols_ind_mm_means.ster, replace
+xi: reg learn absmm_?? $xlist $zlist ability_?? skill_?? i.ind_1d i.occ_1d 
+predict uhat, residuals
+reg uhat l.uhat , noc
+global rhohat = _b["L.uhat"]
+drop uhat
+qui forvalues iter=1/50{
+	qui foreach zv of varlist absmm_?? $zlist ability_?? skill_??  $xlist learn{
+		gen `zv'_R =`zv'
+		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
+		_crcslbl `zv'_R `zv'
+	}
+	xi: reg learn absmm_?? $xlist $zlist ability_?? skill_?? i.ind_1d i.occ_1d 
+	estimate save ${result}/ols_ind_mm_means.ster, replace
+	predict uhat, residuals
+	reg uhat l.uhat , noc
+	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){
+		qui foreach zv of varlist absmm_?? $zlist ability_?? skill_??  $xlist learn{
+			replace `zv'= `zv'_R
+		}
+		drop *_R uhat
+		continue, break
+	}
+	global rhohat = _b["L.uhat"]*0.1 + 0.9*${rhohat}
+	
+	qui foreach zv of varlist absmm_?? $zlist ability_?? skill_??  $xlist learn{
+		replace `zv'= `zv'_R
+	}
+	drop *_R uhat
+}
+
 
 global xlist  ability_??_ten_occ skill_??_ten_occ $xlist_0
 global ivlist ability_??_ten_occ_iv skill_??_ten_occ_iv $ivlist_0
-xi: ivreg2 learn absmm_?? ($xlist = $ivlist) $zlist ability_?? skill_?? i.ind_1d i.occ_1d , robust bw(2)
-estimate save ${result}/iv_ind_mm_means.ster, replace
+xi: ivregress 2sls learn absmm_?? ($xlist = $ivlist) $zlist ability_?? skill_?? i.ind_1d i.occ_1d
+predict uhat, residuals
+reg uhat l.uhat , noc
+global rhohat = _b["L.uhat"]
+drop uhat
+qui forvalues iter=1/50{
+	qui foreach zv of varlist absmm_?? $zlist ability_?? skill_??  $xlist $ivlist learn{
+		gen `zv'_R =`zv'
+		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
+		_crcslbl `zv'_R `zv'
+	}
+	xi: ivregress 2sls learn absmm_?? ($xlist = $ivlist) $zlist ability_?? skill_?? i.ind_1d i.occ_1d 
+	estimate save ${result}/iv_ind_mm_means.ster, replace
+	predict uhat, residuals
+	reg uhat l.uhat , noc
+	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){
+		qui foreach zv of varlist absmm_?? $zlist ability_?? skill_??  $xlist $ivlist learn{
+			replace `zv'= `zv'_R
+		}
+		drop *_R uhat
+		continue, break
+	}
+	global rhohat = _b["L.uhat"]*0.1 + 0.9*${rhohat}
+	
+	qui foreach zv of varlist absmm_?? $zlist ability_?? skill_??  $xlist $ivlist learn{
+		replace `zv'= `zv'_R
+	}
+	drop *_R uhat
+}
 
 /*------------------------------------------------------------------------------------*/
 /* individual component mismatch with tenure */
 
+
 global xlist  absmm_??_ten_occ ability_??_ten_occ skill_??_ten_occ $xlist_0
-xi: ivreg2 learn absmm_?? $xlist $zlist ability_?? skill_?? i.ind_1d i.occ_1d , robust bw(2)
-estimate save ${result}/ols_ind_mm_ten_means.ster, replace
+xi: reg learn absmm_?? $xlist $zlist ability_?? skill_?? i.ind_1d i.occ_1d
+predict uhat, residuals
+reg uhat l.uhat , noc
+global rhohat = _b["L.uhat"]
+drop uhat
+qui forvalues iter=1/50{
+	qui foreach zv of varlist absmm_?? $zlist ability_?? skill_??  $xlist learn{
+		gen `zv'_R =`zv'
+		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
+		_crcslbl `zv'_R `zv'
+	}
+	xi: reg learn absmm_?? $xlist $zlist ability_?? skill_?? i.ind_1d i.occ_1d
+	estimate save ${result}/ols_ind_mm_ten_means.ster, replace
+	predict uhat, residuals
+	reg uhat l.uhat , noc
+	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){
+		qui foreach zv of varlist absmm_?? $zlist ability_?? skill_?? $xlist learn{
+			replace `zv'= `zv'_R
+		}
+		drop *_R uhat
+		continue, break
+	}
+	global rhohat = _b["L.uhat"]*0.1 + 0.9*${rhohat}
+	
+	qui foreach zv of varlist absmm_?? $zlist ability_?? skill_?? $xlist learn{
+		replace `zv'= `zv'_R
+	}
+	drop *_R uhat
+}
 
 global xlist  absmm_??_ten_occ ability_??_ten_occ skill_??_ten_occ $xlist_0
 global ivlist absmm_??_ten_occ_iv ability_??_ten_occ_iv skill_??_ten_occ_iv $ivlist_0
-xi: ivreg2 learn absmm_?? ($xlist = $ivlist) $zlist ability_?? skill_?? i.ind_1d i.occ_1d , robust bw(2)
-estimate save ${result}/iv_ind_mm_ten_means.ster, replace
-
+xi: ivregress 2sls learn absmm_?? ($xlist = $ivlist) $zlist ability_?? skill_?? i.ind_1d i.occ_1d
+predict uhat, residuals
+reg uhat l.uhat , noc
+global rhohat = _b["L.uhat"]
+drop uhat
+qui forvalues iter=1/50{
+	qui foreach zv of varlist absmm_?? $zlist ability_?? skill_??  $xlist $ivlist learn{
+		gen `zv'_R =`zv'
+		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
+		_crcslbl `zv'_R `zv'
+	}
+	xi: ivregress 2sls learn absmm_?? ($xlist = $ivlist) $zlist ability_?? skill_?? i.ind_1d i.occ_1d 
+	estimate save ${result}/iv_ind_mm_ten_means.ster, replace
+	predict uhat, residuals
+	reg uhat l.uhat , noc
+	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){
+		qui foreach zv of varlist absmm_?? $zlist ability_?? skill_??  $xlist $ivlist learn{
+			replace `zv'= `zv'_R
+		}
+		drop *_R uhat
+		continue, break
+	}
+	global rhohat = _b["L.uhat"]*0.1 + 0.9*${rhohat}
+	
+	qui foreach zv of varlist absmm_?? $zlist ability_?? skill_??  $xlist $ivlist learn{
+		replace `zv'= `zv'_R
+	}
+	drop *_R uhat
+}
 /*------------------------------------------------------------------------------------*/
 /* individual component cumulative mismatch */
-
 global xlist  absmm_??_ten_occ ability_??_ten_occ skill_??_ten_occ $xlist_0 
-xi: ivreg2 learn cmm_aa cmm_bb cmm_cc absmm_?? $xlist $zlist ability_?? skill_?? i.ind_1d i.occ_1d, robust bw(2)
-estimate save ${result}/ols_ind_cmm_mm_means.ster, replace
+xi: reg learn cmm_aa cmm_bb cmm_cc absmm_?? $xlist $zlist ability_?? skill_?? i.ind_1d i.occ_1d 
+predict uhat, residuals
+reg uhat l.uhat , noc
+global rhohat = _b["L.uhat"]
+drop uhat
+qui forvalues iter=1/50{
+	qui foreach zv of varlist cmm_aa cmm_bb cmm_cc absmm_?? $zlist ability_?? skill_??  $xlist learn{
+		gen `zv'_R =`zv'
+		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
+		_crcslbl `zv'_R `zv'
+	}
+	xi: reg learn cmm_aa cmm_bb cmm_cc absmm_?? $xlist $zlist ability_?? skill_?? i.ind_1d i.occ_1d 
+	estimate save ${result}/ols_ind_cmm_mm_means.ster, replace
+	predict uhat, residuals
+	reg uhat l.uhat , noc
+	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){
+		qui foreach zv of varlist cmm_aa cmm_bb cmm_cc absmm_?? $zlist ability_?? skill_??  $xlist learn{
+			replace `zv'= `zv'_R
+		}
+		drop *_R uhat
+		continue, break
+	}
+	global rhohat = _b["L.uhat"]*0.1 + 0.9*${rhohat}
+	
+	qui foreach zv of varlist cmm_aa cmm_bb cmm_cc absmm_?? $zlist ability_?? skill_??  $xlist learn{
+		replace `zv'= `zv'_R
+	}
+	drop *_R uhat
+}
+xi: reg learn cmm_aa cmm_bb cmm_cc absmm_?? $xlist $zlist ability_?? skill_?? i.ind_1d i.occ_1d , vce(robust)
+estimate save ${result}/ols_ind_cmm_mm_means_rbst.ster, replace
+
+xi: ivreg2 learn cmm_aa cmm_bb cmm_cc absmm_?? $xlist $zlist ability_?? skill_?? i.ind_1d i.occ_1d , robust bw(2)
+estimate save ${result}/ols_ind_cmm_mm_means_hac.ster, replace
+
 
 global xlist  absmm_??_ten_occ ability_??_ten_occ skill_??_ten_occ $xlist_0 
 global ivlist absmm_??_ten_occ_iv ability_??_ten_occ_iv skill_??_ten_occ_iv $ivlist_0
-xi: ivreg2 learn cmm_aa cmm_bb cmm_cc absmm_?? ($xlist = $ivlist) $zlist ability_?? skill_?? i.ind_1d i.occ_1d, robust bw(2)
-estimate save ${result}/iv_ind_cmm_mm_means.ster, replace
-
+xi: ivregress 2sls learn cmm_aa cmm_bb cmm_cc absmm_?? ($xlist = $ivlist) $zlist ability_?? skill_?? i.ind_1d i.occ_1d
+predict uhat, residuals
+reg uhat l.uhat , noc
+global rhohat = _b["L.uhat"]
+drop uhat
+qui forvalues iter=1/50{
+	qui foreach zv of varlist cmm_aa cmm_bb cmm_cc absmm_?? $zlist ability_?? skill_??  $xlist $ivlist learn{
+		gen `zv'_R =`zv'
+		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
+		_crcslbl `zv'_R `zv'
+	}
+	xi: ivregress 2sls learn cmm_aa cmm_bb cmm_cc absmm_?? ($xlist = $ivlist) $zlist ability_?? skill_?? i.ind_1d i.occ_1d 
+	estimate save ${result}/iv_ind_cmm_mm_means.ster, replace
+	predict uhat, residuals
+	reg uhat l.uhat , noc
+	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){
+		qui foreach zv of varlist cmm_aa cmm_bb cmm_cc absmm_?? $zlist ability_?? skill_??  $xlist $ivlist learn{
+			replace `zv'= `zv'_R
+		}
+		drop *_R uhat
+		continue, break
+	}
+	global rhohat = _b["L.uhat"]*0.1 + 0.9*${rhohat}
+	
+	qui foreach zv of varlist cmm_aa cmm_bb cmm_cc absmm_?? $zlist ability_?? skill_??  $xlist $ivlist learn{
+		replace `zv'= `zv'_R
+	}
+	drop *_R uhat
+}
 /*------------------------------------------------------------------------------------*/
 /*------------------------------------------------------------------------------------*/
 /*------------------------------------------------------------------------------------*/

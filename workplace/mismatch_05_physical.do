@@ -795,8 +795,8 @@ label var mm "Mismatch"
 label var mm_ten_occ "Mismatch $\times$ Occ Tenure"
 label var mm_neg "Negative Mismatch"
 label var mm_pos "Positive Mismatch"
-label var mm_neg_ten_occ "Pos. Mismatch $\times$ Occ Tenure"
-label var mm_pos_ten_occ "Neg. Mismatch $\times$ Occ Tenure"
+label var mm_neg_ten_occ "Neg. Mismatch $\times$ Occ Tenure"
+label var mm_pos_ten_occ "Pos. Mismatch $\times$ Occ Tenure"
 
 label var ability_mean "Worker Ability (Mean)"
 label var skill_mean "Occ Reqs (Mean)"
@@ -993,7 +993,6 @@ estimate save ${result}/bench_iv.ster, replace
 
 /*------------------------------------------------------------------------------------*/
 /* mismatch */
-
 
 global xlist  ability_mean_ten_occ skill_mean_ten_occ $xlist_0
 xi: reg lwage mm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d
