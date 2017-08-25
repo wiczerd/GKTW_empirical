@@ -16,9 +16,9 @@ set more off
 /*--------------------------------------------------------------------------------------*/
 /* CHANGE THIS PART */
 
-*global base_folder "/home/satoshi/data/mismatch/nlsy79"
-*global base_folder "/media/satoshi/portable_hdd/data/mismatch/nlsy79"
-global base_folder "~/workspace/GKTW_empirical/repo"
+//global base_folder "/media/satoshi/portable_hdd/Dropbox/data/mismatch/nlsy79" 
+global base_folder "/media/satoshi/second_hdd/Dropbox/data/mismatch/nlsy79" 
+//global base_folder "~/workspace/GKTW_empirical/repo"
 
 /*--------------------------------------------------------------------------------------*/
 /*--------------------------------------------------------------------------------------*/
@@ -33,7 +33,22 @@ global onet $base_folder/onetstata
 
 /*--------------------------------------------------------------------------------------*/
 /*--------------------------------------------------------------------------------------*/
-*do $workplace/mismatch_01_KSA_setup.do
-*do $workplace/mismatch_02_nlsy79_setup.do
-*do $workplace/mismatch_03_cleaning.do
-*do $workplace/mismatch_04_regression.do
+
+//do $workplace/mismatch_01_KSA_setup.do 
+//do $workplace/mismatch_02_nlsy79_setup.do 
+//do $workplace/mismatch_03_cleaning.do 
+//do $workplace/mismatch_04_regression.do 
+*do $workplace/mismatch_05_physical.do 
+*do $workplace/mismatch_06_college.do 
+//do $workplace/mismatch_07_ern_cleaning.do 
+*do $workplace/mismatch_08_ern_regression.do 
+*do $workplace/mismatch_09_log_regression.do 
+*do $workplace/mismatch_10_ability2_skill2_regression.do 
+*do $workplace/mismatch_11_ability_exp_regression.do 
+//do $workplace/mismatch_12_fixed_effects_regression.do 
+//do $workplace/mismatch_13_clustering_regression.do 
+do $workplace/mismatch_14_fgls_regression.do 
+//do $workplace/mismatch_rr_1_ref_3_5.do 
+//do $workplace/mismatch_rr_1_ref_3_7.do 
+//do $workplace/mismatch_rr_1_ref_3_8.do 
+//do $workplace/mismatch_rr_1_ref_3_9.do 
