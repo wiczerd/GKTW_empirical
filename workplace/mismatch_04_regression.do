@@ -1526,7 +1526,7 @@ qui forvalues iter=1/50{
 		_crcslbl `zv'_R `zv'
 	}
 	xi: xtivreg lwage mm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d, fe
-	estimate save ${result}/iv_cmm_mm_fgls_fe.ster, replace
+	estimate save ${result}/iv_cmm_mm_means_fgls_fe.ster, replace
 
 	predict uhat, e
 	reg uhat l.uhat, noc /*, fe  */
