@@ -237,7 +237,7 @@ drop max_grade
 
 /* descriptive statistics: > high school */
 
-use $result/yearly_03.dta, clear
+use ${data}/yearly_03.dta, clear
 
 sort id year
 xtset id year
@@ -273,7 +273,7 @@ drop max_grade
 /*------------------------------------------------------------------------------------*/
 /*------------------------------------------------------------------------------------*/
 
-use $result/yearly_03.dta, clear
+use ${data}/yearly_03.dta, clear
 
 /* generate some  other covariates */
 
