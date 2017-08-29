@@ -2062,16 +2062,16 @@ estimate store iv_cmm_mm_means_fgls_fe
 
 
 /* tex */		   
-esttab iv_cmm_mm_means_HAC iv_cmm_mm_means_fgls iv_cmm_mm_means_clu iv_cmm_mm_means_fe iv_cmm_mm_means_fgls_fe iv_cmm_mm_means_clu_fe ///
+esttab iv_cmm_mm_means_fgls iv_cmm_mm_means_clu iv_cmm_mm_means_fgls_fe iv_cmm_mm_means_clu_fe ///
                    using ${result}/table_${diminitls}_secompare.tex, b(4) ///
                    r2 nodepvars gaps not label nonotes substitute(\hline\hline \hline \hline "\hline  " "Standard" "Robust standard" ///
                    "\sym{\sym{\dagger}}" "$^{\dagger}$" "\sym{\sym{*}}" "$^{*}$" "\sym{\sym{**}}" "$^{**}$") ///
 		   drop(_I* ten* exp* oj $zlist _cons) ///
-		   mtitles("IV-HAC" "IV-FGLS" "IV-CLU" "IV-HAC-FE" "IV-FGLS-FE" "IV-CLU-FE") ///
+		   mtitles("IV-FGLS" "IV-CLU" "IV-FGLS-FE" "IV-CLU-FE") ///
 		   order(mm mm_ten_occ cmm ability_mean ability_mean_ten_occ skill_mean skill_mean_ten_occ) ///
                    star(* 0.10 ** 0.05 *** 0.01) replace
 		   
-esttab iv_cmm_mm_means_HAC iv_cmm_mm_means_fgls iv_cmm_mm_means_clu iv_cmm_mm_means_fe iv_cmm_mm_means_fgls_fe iv_cmm_mm_means_clu_fe ///
+esttab iv_cmm_mm_means_fgls iv_cmm_mm_means_clu iv_cmm_mm_means_fgls_fe iv_cmm_mm_means_clu_fe ///
                    using ${result}/table_apx_${diminitls}_secompare.tex, b(4) se(4) ///
                    r2 nodepvars nogaps label longtable substitute(\hline\hline \hline \hline "\hline  " ///
 		   "Standard errors in parentheses" "All regressions include occupation and industry dummies." ///
@@ -2079,7 +2079,7 @@ esttab iv_cmm_mm_means_HAC iv_cmm_mm_means_fgls iv_cmm_mm_means_clu iv_cmm_mm_me
                    "\sym{\sym{\dagger}}" "$^{\dagger}$" "\sym{\sym{*}}" "$^{*}$" "\sym{\sym{**}}" "$^{**}$") ///
 		   title("Wage Regression with Mismatch (Full Results)") ///
 		   drop(_I*) ///
-		   mtitles("IV-HAC" "IV-FGLS" "IV-CLU" "IV-HAC-FE" "IV-FGLS-FE" "IV-CLU-FE") ///
+		   mtitles("IV-FGLS" "IV-CLU" "IV-FGLS-FE" "IV-CLU-FE") ///
 		   order(mm mm_ten_occ cmm ability_mean ability_mean_ten_occ skill_mean skill_mean_ten_occ ten* exp* oj $zlist _cons) ///
                    star(* 0.10 ** 0.05 *** 0.01) replace
 
