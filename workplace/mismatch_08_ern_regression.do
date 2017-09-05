@@ -1097,7 +1097,7 @@ predict uhat, residuals
 reg uhat l.uhat, noc /*, fe  */
 global rhohat = _b["L.uhat"]
 drop uhat
-qui forvalues iter=1/50{
+ forvalues iter=1/50{
 	qui foreach zv of varlist mm cmm $zlist ability_mean skill_mean $xlist $ivlist learn{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
@@ -1122,6 +1122,9 @@ qui forvalues iter=1/50{
 	}
 	drop *_R uhat
 }
+
+/*------------------------------------------------------------------------------------*/
+/* mismatch with positive & negative components */
 
 global xlist  $xlist_0
 xi: reg learn mm_pos mm_neg $xlist $zlist i.ind_1d i.occ_1d
