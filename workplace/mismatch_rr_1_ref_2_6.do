@@ -1064,6 +1064,218 @@ estimate save ${result}/iv_cmm_mm_young.ster, replace
 
 
 
+/*------------------------------------------------------------------------------------*/
+/* mismatch */
+
+global xlist  ability_mean_ten_occ skill_mean_ten_occ $xlist_0
+xi: reg lwage mm mm_lt35 lt35 $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d
+predict uhat, residuals
+reg uhat l.uhat, noc /*, fe  */
+global rhohat = _b["L.uhat"]
+drop uhat
+qui forvalues iter=1/50{
+	qui foreach zv of varlist mm mm_lt35 $zlist ability_mean skill_mean $xlist lwage{
+		gen `zv'_R =`zv'
+		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
+*		replace `zv' = `zv'_R*(1-${rhohat}^2)^0.5 if obs1==1 & `zv'==.
+		_crcslbl `zv'_R `zv'
+	}
+	xi: reg lwage mm mm_lt35 lt35 $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d
+	estimate save ${result}/ols_mm_means.ster, replace
+	predict uhat, residuals
+	reg uhat l.uhat, noc /*, fe  */
+	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){
+		qui foreach zv of varlist mm $zlist ability_mean skill_mean $xlist lwage{
+			replace `zv'= `zv'_R
+		}
+		drop *_R uhat
+		continue, break
+	}
+	global rhohat = _b["L.uhat"]*0.1 + 0.9*${rhohat}
+	
+	qui foreach zv of varlist mm mm_lt35 lt35 $zlist ability_mean skill_mean $xlist lwage{
+		replace `zv'= `zv'_R
+	}
+	drop *_R uhat
+}
+
+
+global xlist  ability_mean_ten_occ skill_mean_ten_occ $xlist_0
+global ivlist ability_mean_ten_occ_iv skill_mean_ten_occ_iv $ivlist_0
+ivregress 2sls lwage mm mm_lt35 ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d
+predict uhat, residuals
+reg uhat l.uhat, noc /*, fe  */
+global rhohat = _b["L.uhat"]
+drop uhat
+qui forvalues iter=1/50{
+	qui foreach zv of varlist mm mm_lt35 $zlist ability_mean skill_mean $xlist $ivlist lwage{
+		gen `zv'_R =`zv'
+		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
+*		replace `zv' = `zv'_R*(1-${rhohat}^2)^0.5 if obs1==1 & `zv'==.
+		_crcslbl `zv'_R `zv'
+	}
+	xi: ivregress 2sls lwage mm mm_lt35 ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d
+	estimate save ${result}/iv_mm_means.ster, replace
+
+	predict uhat, residuals
+	reg uhat l.uhat, noc /*, fe  */
+	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){
+		qui foreach zv of varlist mm mm_lt35 $zlist ability_mean skill_mean $xlist $ivlist lwage{
+			replace `zv'= `zv'_R
+		}
+		drop *_R uhat
+		continue, break
+	}
+	global rhohat = _b["L.uhat"]*0.1 + 0.9*${rhohat}
+	
+	qui foreach zv of varlist mm mm_lt35 $zlist ability_mean skill_mean $xlist $ivlist lwage{
+		replace `zv'= `zv'_R
+	}
+	drop *_R uhat
+}
+
+/*------------------------------------------------------------------------------------*/
+/* mismatch with tenure */
+
+global xlist  mm_ten_occ_lt35 mm_ten_occ ability_mean_ten_occ skill_mean_ten_occ $xlist_0
+xi: reg lwage mm mm_lt35 $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d 
+predict uhat, residuals
+reg uhat l.uhat, noc /*, fe  */
+global rhohat = _b["L.uhat"]
+drop uhat
+qui forvalues iter=1/50{
+	qui foreach zv of varlist mm mm_lt35 $zlist ability_mean skill_mean $xlist lwage{
+		gen `zv'_R =`zv'
+		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
+*		replace `zv' = `zv'_R*(1-${rhohat}^2)^0.5 if obs1==1 & `zv'==.
+		_crcslbl `zv'_R `zv'
+	}
+	xi: reg lwage mm mm_lt35 $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d 
+	estimate save ${result}/ols_mm_ten_means.ster, replace
+
+	predict uhat, residuals
+	reg uhat l.uhat, noc /*, fe  */
+	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){
+		qui foreach zv of varlist mm mm_lt35 $zlist ability_mean skill_mean $xlist lwage{
+			replace `zv'= `zv'_R
+		}
+		drop *_R uhat
+		continue, break
+	}
+	global rhohat = _b["L.uhat"]*0.1 + 0.9*${rhohat}
+	
+	qui foreach zv of varlist mm mm_lt35 $zlist ability_mean skill_mean $xlist lwage{
+		replace `zv'= `zv'_R
+	}
+	drop *_R uhat
+}
+
+
+global xlist mm_ten_occ_lt35  mm_ten_occ ability_mean_ten_occ skill_mean_ten_occ $xlist_0
+global ivlist mm_ten_occ_iv_lt35 mm_ten_occ_iv ability_mean_ten_occ_iv skill_mean_ten_occ_iv $ivlist_0
+ivregress 2sls lwage mm mm_lt35 ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d
+predict uhat, residuals
+reg uhat l.uhat, noc /*, fe  */
+global rhohat = _b["L.uhat"]
+drop uhat
+qui forvalues iter=1/50{
+	qui foreach zv of varlist mm mm_lt35 $zlist ability_mean skill_mean $xlist $ivlist lwage{
+		gen `zv'_R =`zv'
+		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
+		_crcslbl `zv'_R `zv'
+	}
+	xi: ivregress 2sls lwage mm mm_lt35 ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d
+	estimate save ${result}/iv_mm_ten_means.ster, replace
+
+	predict uhat, residuals
+	reg uhat l.uhat, noc /*, fe  */
+	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){
+		qui foreach zv of varlist mm mm_lt35 $zlist ability_mean skill_mean $xlist $ivlist lwage{
+			replace `zv'= `zv'_R
+		}
+		drop *_R uhat
+		continue, break
+	}
+	global rhohat = _b["L.uhat"]*0.1 + 0.9*${rhohat}
+	
+	qui foreach zv of varlist mm mm_lt35 $zlist ability_mean skill_mean $xlist $ivlist lwage{
+		replace `zv'= `zv'_R
+	}
+	drop *_R uhat
+}
+
+
+/*------------------------------------------------------------------------------------*/
+/* cumulative mismatch */
+
+global xlist  mm_ten_occ_lt35 mm_ten_occ ability_mean_ten_occ skill_mean_ten_occ $xlist_0
+xi: reg lwage mm mm_lt35 cmm cmm_lt35 $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d
+predict uhat, residuals
+reg uhat l.uhat, noc /*, fe  */
+global rhohat = _b["L.uhat"]
+drop uhat
+qui forvalues iter=1/50{
+	qui foreach zv of varlist mm mm_lt35 cmm cmm_lt35  $zlist ability_mean skill_mean $xlist lwage{
+		gen `zv'_R =`zv'
+		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
+*		replace `zv' = `zv'_R*(1-${rhohat}^2)^0.5 if obs1==1 & `zv'==.
+		_crcslbl `zv'_R `zv'
+	}
+	xi: reg lwagemm mm_lt35 cmm cmm_lt35  $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d
+	estimate save ${result}/ols_cmm_mm_means.ster, replace
+	predict uhat, residuals
+	reg uhat l.uhat, noc /*, fe  */
+	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){
+		qui foreach zv of varlist mm mm_lt35 cmm cmm_lt35  $zlist ability_mean skill_mean $xlist lwage{
+			replace `zv'= `zv'_R
+		}
+		drop *_R uhat
+		continue, break
+	}
+	global rhohat = _b["L.uhat"]*0.1 + 0.9*${rhohat}
+	
+	qui foreach zv of varlist mm mm_lt35 cmm cmm_lt35  $zlist ability_mean skill_mean $xlist lwage{
+		replace `zv'= `zv'_R
+	}
+	drop *_R uhat
+}
+
+
+global xlist  mm_ten_occ_lt35 mm_ten_occ ability_mean_ten_occ skill_mean_ten_occ $xlist_0
+global ivlist mm_ten_occ_iv_lt35 mm_ten_occ_iv ability_mean_ten_occ_iv skill_mean_ten_occ_iv $ivlist_0
+ivregress 2sls lwage mm mm_lt35 cmm cmm_lt35  ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d
+predict uhat, residuals
+reg uhat l.uhat, noc 
+global rhohat = _b["L.uhat"]
+drop uhat
+qui forvalues iter=1/50{
+	qui foreach zv of varlist mm mm_lt35 cmm cmm_lt35  $zlist ability_mean skill_mean $xlist $ivlist lwage{
+		gen `zv'_R =`zv'
+		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
+		_crcslbl `zv'_R `zv'
+	}
+	xi: ivregress 2sls lwage mm mm_lt35 cmm cmm_lt35  ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d
+	estimate save ${result}/iv_cmm_mm_means.ster, replace
+
+	predict uhat, residuals
+	reg uhat l.uhat, noc /*, fe  */
+	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){
+		qui foreach zv of varlist mm mm_lt35 cmm cmm_lt35  $zlist ability_mean skill_mean $xlist $ivlist lwage{
+			replace `zv'= `zv'_R
+		}
+		drop *_R uhat
+		continue, break
+	}
+	global rhohat = _b["L.uhat"]*0.1 + 0.9*${rhohat}
+	
+	qui foreach zv of varlist mm mm_lt35 cmm cmm_lt35  $zlist ability_mean skill_mean $xlist $ivlist lwage{
+		replace `zv'= `zv'_R
+	}
+	drop *_R uhat
+}
+
+
+
 /*-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-*/		   
 /* for referees */
 /*------------------------------------------------------------------------------------*/		   
@@ -1116,9 +1328,7 @@ esttab iv_mm_young iv_mm_ten_young iv_cmm_mm_young ols_mm_young ols_mm_ten_young
 
 matrix ten_mm_cmm_105090_lt35 = J(4,3,0.)
 _pctile mm if lt35==1, p(10 50 90)
-matrix ten_mm_cmm_105090_lt35[1,2] = r(r1)
 matrix ten_mm_cmm_105090_lt35[2,2] = r(r2)
-matrix ten_mm_cmm_105090_lt35[3,2] = r(r3)
 local mm10 = r(r1)
 local mm90 = r(r3)
 sum mm if lt35==1 & mm<=`mm10', meanonly
