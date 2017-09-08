@@ -1093,7 +1093,7 @@ qui forvalues iter=1/50{
 	}
 	global rhohat = _b["L.uhat"]*0.1 + 0.9*${rhohat}
 	
-	qui foreach zv of varlist mm mm_lt35 lt35 $zlist ability_mean skill_mean $xlist lwage{
+	qui foreach zv of varlist mm mm_lt35 $zlist ability_mean skill_mean $xlist lwage{
 		replace `zv'= `zv'_R
 	}
 	drop *_R uhat
@@ -1221,7 +1221,7 @@ qui forvalues iter=1/50{
 *		replace `zv' = `zv'_R*(1-${rhohat}^2)^0.5 if obs1==1 & `zv'==.
 		_crcslbl `zv'_R `zv'
 	}
-	xi: reg lwagemm mm_lt35 cmm cmm_lt35  $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d
+	xi: reg lwage mm mm_lt35 cmm cmm_lt35  $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d
 	estimate save ${result}/ols_cmm_mm_young.ster, replace
 	predict uhat, residuals
 	reg uhat l.uhat, noc /*, fe  */
