@@ -1081,7 +1081,7 @@ qui forvalues iter=1/50{
 		_crcslbl `zv'_R `zv'
 	}
 	xi: reg lwage mm mm_lt35 lt35 $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d
-	estimate save ${result}/ols_mm_means.ster, replace
+	estimate save ${result}/ols_mm_young.ster, replace
 	predict uhat, residuals
 	reg uhat l.uhat, noc /*, fe  */
 	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){
@@ -1115,7 +1115,7 @@ qui forvalues iter=1/50{
 		_crcslbl `zv'_R `zv'
 	}
 	xi: ivregress 2sls lwage mm mm_lt35 ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d
-	estimate save ${result}/iv_mm_means.ster, replace
+	estimate save ${result}/iv_mm_young.ster, replace
 
 	predict uhat, residuals
 	reg uhat l.uhat, noc /*, fe  */
@@ -1151,7 +1151,7 @@ qui forvalues iter=1/50{
 		_crcslbl `zv'_R `zv'
 	}
 	xi: reg lwage mm mm_lt35 $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d 
-	estimate save ${result}/ols_mm_ten_means.ster, replace
+	estimate save ${result}/ols_mm_ten_young.ster, replace
 
 	predict uhat, residuals
 	reg uhat l.uhat, noc /*, fe  */
@@ -1185,7 +1185,7 @@ qui forvalues iter=1/50{
 		_crcslbl `zv'_R `zv'
 	}
 	xi: ivregress 2sls lwage mm mm_lt35 ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d
-	estimate save ${result}/iv_mm_ten_means.ster, replace
+	estimate save ${result}/iv_mm_ten_young.ster, replace
 
 	predict uhat, residuals
 	reg uhat l.uhat, noc /*, fe  */
@@ -1222,7 +1222,7 @@ qui forvalues iter=1/50{
 		_crcslbl `zv'_R `zv'
 	}
 	xi: reg lwagemm mm_lt35 cmm cmm_lt35  $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d
-	estimate save ${result}/ols_cmm_mm_means.ster, replace
+	estimate save ${result}/ols_cmm_mm_young.ster, replace
 	predict uhat, residuals
 	reg uhat l.uhat, noc /*, fe  */
 	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){
@@ -1255,7 +1255,7 @@ qui forvalues iter=1/50{
 		_crcslbl `zv'_R `zv'
 	}
 	xi: ivregress 2sls lwage mm mm_lt35 cmm cmm_lt35  ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d
-	estimate save ${result}/iv_cmm_mm_means.ster, replace
+	estimate save ${result}/iv_cmm_mm_young.ster, replace
 
 	predict uhat, residuals
 	reg uhat l.uhat, noc /*, fe  */
