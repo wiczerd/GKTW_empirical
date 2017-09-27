@@ -1023,6 +1023,7 @@ estimate save ${result}/bench_iv.ster, replace
 gen lt35 = (age<35)
 gen mm_lt35 = mm*lt35
 gen cmm_lt35 = cmm*lt35
+gen ten_occ_lt35 = tenure_occ*lt35
 gen mm_ten_occ_lt35 = tenure_occ*mm *lt35
 gen mm_ten_occ_iv_lt35 = ten_occ_iv*mm *lt35
 
@@ -1030,14 +1031,16 @@ label var mm_lt35 "Mismatch, $< 35$"
 label var cmm_lt35 "Cumul Mismatch, $< 35$"
 label var mm_ten_occ_lt35 "Mismatch $\times$ Occ Ten, $< 35$"
 label var lt35 "< 35"
-/* could do it all with <30
+/* could do it all with <30*/
 gen lt30 = (age<30)
 gen mm_lt30 = mm*lt30
 gen cmm_lt30 = cmm*lt30
 gen mm_ten_occ_lt30 = tenure_occ*mm *lt30
-gen mm_ten_occ_iv_lt30 = ten_occ_iv*mm *lt30
-*/
+gen ten_occ_lt30 = tenure_occ*lt30
 
+gen mm_ten_occ_iv_lt30 = ten_occ_iv*mm *lt30
+
+/*
 global xlist  ability_mean_ten_occ skill_mean_ten_occ $xlist_0
 global ivlist ability_mean_ten_occ_iv skill_mean_ten_occ_iv $ivlist_0
 
@@ -1061,7 +1064,7 @@ estimate save ${result}/ols_cmm_mm_young.ster, replace
 
 xi: ivreg2 lwage mm mm_lt35 cmm cmm_lt35 ($xlist  = $ivlist ) $zlist lt35 ability_mean skill_mean i.ind_1d i.occ_1d , bw(2) robust
 estimate save ${result}/iv_cmm_mm_young.ster, replace
-
+*/
 
 
 /*------------------------------------------------------------------------------------*/
@@ -1241,8 +1244,8 @@ qui forvalues iter=1/50{
 }
 
 
-global xlist  mm_ten_occ_lt35 mm_ten_occ ability_mean_ten_occ skill_mean_ten_occ $xlist_0
-global ivlist mm_ten_occ_iv_lt35 mm_ten_occ_iv ability_mean_ten_occ_iv skill_mean_ten_occ_iv $ivlist_0
+global xlist  mm_ten_occ_lt35 mm_ten_occ  ability_mean_ten_occ skill_mean_ten_occ $xlist_0
+global ivlist mm_ten_occ_iv_lt35 mm_ten_occ_iv   ability_mean_ten_occ_iv skill_mean_ten_occ_iv $ivlist_0
 ivregress 2sls lwage mm mm_lt35 cmm cmm_lt35  ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d
 predict uhat, residuals
 reg uhat l.uhat, noc 
