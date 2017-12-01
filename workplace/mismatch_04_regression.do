@@ -1110,6 +1110,7 @@ foreach i of local nlist{
 	matrix list mat_total_resid_ern_`i'
 }
 
+
 /*------------------------------------------------------------------------------------*/
 /*------------------------------------------------------------------------------------*/
 /*------------------------------------------------------------------------------------*/
@@ -1316,6 +1317,7 @@ qui forvalues iter=1/50{
 	drop *_R uhat
 }
 
+
 global xlist  mm_ten_occ ability_mean_ten_occ skill_mean_ten_occ $xlist_0
 global ivlist mm_ten_occ_iv ability_mean_ten_occ_iv skill_mean_ten_occ_iv $ivlist_0
 ivregress 2sls lwage mm cmm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d
@@ -1348,7 +1350,7 @@ qui forvalues iter=1/50{
 	}
 	drop *_R uhat
 }
-
+global rhohat_baseline = $rhohat
 /*------------------------------------------------------------------------------------*/
 /* mismatch with positive & negative components */
 
@@ -1879,6 +1881,92 @@ esttab iv_ind_mm_means iv_ind_mm_ten_means iv_ind_cmm_mm_means ols_ind_mm_means 
 		   title("Wage Regression with Mismatch by Components (Full Results)") ///
 		   order(absmm_aa absmm_bb absmm_cc absmm_aa_t* absmm_bb_t* absmm_cc_t* cmm_aa cmm_bb cmm_cc ability_?? ability_??_* skill_?? skill_??_* ten* exp* oj $zlist _cons) ///
                    star(* 0.10 ** 0.05 *** 0.01) replace
+
+/*------------------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------------*/
+/* Counter factual distribution */
+/*------------------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------------*/
+estimate clear
+estimate use ${result}/iv_cmm_mm_means.ster
+predict lwage_hat
+estimate use ${result}/iv_cmm_mm_means.ster
+adjust mm=0 cmm=0 mm_ten_occ=0, gen(lwage_mm_cmm_0)
+
+// Have to adjust the mean because of the GLS implementation shifts it by (1-rhohat)*const
+sum lwage if lwage_hat<. ,meanonly
+local lw_mean = r(mean)
+sum lwage_hat if lwage_hat<. ,meanonly
+replace lwage_hat = lwage_hat- r(mean)+`lw_mean'
+replace lwage_mm_cmm_0 = lwage_mm_cmm_0 - r(mean)+`lw_mean'
+
+
+twoway (kdensity lwage_mm_cmm_0 ) (kdensity lwage_hat), ///
+xtitle("Log Wage", size(medlarge)) ///
+ytitle("Density", size(medlarge)) ///
+title("Full Sample", size(medlarge)) ///
+graphregion(color(white)) xlabel(, grid gstyle(default)) ylabel(,grid gstyle(default)) ///
+legend(lab(1 "Counter-factual, no mismatch") ///
+       lab(2 "Fitted wages") ///
+ring(0) position(1) rows(2) ) ///
+saving(${result}/counter_factual_mm0, replace) 
+graph export ${result}/counter_factual_mm0.eps, replace
+graph export ${result}/counter_factual_mm0.png, replace
+
+matrix counter_factual_deciles = J(9,2,0.0)
+_pctile lwage_mm_cmm_0 , p(10(10)90)
+forvalues di =1/9{
+	matrix counter_factual_deciles[`di',1] = r(r`di')
+}
+_pctile lwage_hat , p(10(10)90)
+forvalues di =1/9{
+	matrix counter_factual_deciles[`di',2] = r(r`di')
+}
+matrix colnames counter_factual_deciles = No~MM Baseline
+matrix rownames counter_factual_deciles = p10 p20 p30 p40 p50 p60 p70 p80 p90
+mat2txt, matrix(counter_factual_deciles ) saving( ${result}/counter_factual_deciles.csv) replace
+
+//convert to dollar values
+gen wage_hat = exp(lwage_hat)/100
+gen wage_mm_cmm_0 = exp(lwage_mm_cmm_0 )/100
+
+
+twoway (kdensity lwage_mm_cmm_0 ) (kdensity lwage_hat) if age<35, ///
+xtitle("Log Wage", size(medlarge)) ///
+ytitle("Density", size(medlarge)) ///
+title("Age <35", size(medlarge)) ///
+graphregion(color(white)) xlabel(, grid gstyle(default)) ylabel(,grid gstyle(default)) ///
+legend(lab(1 "Counter-factual, no mismatch") ///
+       lab(2 "Fitted wages") ///
+ring(0) position(1) rows(2) ) ///
+saving(${result}/counter_factual_mm0, replace) 
+graph export ${result}/yng_counter_factual_mm0.eps, replace
+graph export ${result}/yng_counter_factual_mm0.png, replace
+
+twoway (kdensity lwage_mm_cmm_0 ) (kdensity lwage_hat) if univ==1, ///
+xtitle("Log Wage", size(medlarge)) ///
+ytitle("Density", size(medlarge)) ///
+title("College-educated") ///
+graphregion(color(white)) xlabel(, grid gstyle(default)) ylabel(,grid gstyle(default)) ///
+legend(lab(1 "Counter-factual, no mismatch") ///
+       lab(2 "Fitted wages") ///
+ring(0) position(11) rows(2) ) ///
+saving(${result}/counter_factual_mm0, replace) 
+graph export ${result}/col_counter_factual_mm0.eps, replace
+graph export ${result}/col_counter_factual_mm0.png, replace
+
+twoway (kdensity lwage_mm_cmm_0 ) (kdensity lwage_hat) if nswitch>2, ///
+xtitle("Log Wage", size(medlarge)) ///
+ytitle("Density", size(medlarge)) ///
+title("Switch > 2x", size(medlarge)) ///
+graphregion(color(white)) xlabel(, grid gstyle(default)) ylabel(,grid gstyle(default)) ///
+legend(lab(1 "Counter-factual, no mismatch") ///
+       lab(2 "Fitted wages") ///
+ring(0) position(1) rows(2) ) ///
+saving(${result}/counter_factual_mm0, replace) 
+graph export ${result}/sw2_counter_factual_mm0.eps, replace
+graph export ${result}/sw2_counter_factual_mm0.png, replace
+
 
 /*------------------------------------------------------------------------------------*/		   
 /* predicted effect of mismatch on wages */
