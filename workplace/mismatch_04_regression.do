@@ -1930,6 +1930,10 @@ mat2txt, matrix(counter_factual_deciles ) saving( ${result}/counter_factual_deci
 gen wage_hat = exp(lwage_hat)/100
 gen wage_mm_cmm_0 = exp(lwage_mm_cmm_0 )/100
 
+sum wage_hat 
+local mean_wage_hat=r(mean)
+sum wage_mm_cmm_0
+disp r(mean)/`mean_wage_hat'
 
 twoway (kdensity lwage_mm_cmm_0 ) (kdensity lwage_hat) if age<35, ///
 xtitle("Log Wage", size(medlarge)) ///
@@ -2460,6 +2464,13 @@ label var chng_skill "Change in Skill"
 global swlist $zlist ltenure_emp lten_emp2 ltenure_occ lten_occ2 lten_occ3 lexp lexp2 lexp3 loj i.occ_1d i.ind_1d
 xi: reg chng_skill lmm_pos lmm_neg $swlist if switch_occ==1
 estimate save ${result}/mm_${diminitls}_where_pos_neg.ster, replace
+
+
+global swlist $zlist ltenure_emp lten_emp2 ltenure_occ lten_occ2 lten_occ3 lexp lexp2 lexp3 loj i.occ_1d i.ind_1d
+gen lmm_pos_exp = lmm_pos*lexp
+gen lmm_neg_exp = lmm_neg*lexp
+xi: reg chng_skill lmm_pos lmm_neg lmm_pos_exp lmm_neg_exp $swlist if switch_occ==1
+
 
 /*------------------------------------------------------------------------------------*/
 /*------------------------------------------------------------------------------------*/

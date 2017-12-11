@@ -1329,6 +1329,40 @@ esttab iv_mm_young iv_mm_ten_young iv_cmm_mm_young ols_mm_young ols_mm_ten_young
 /*-----------------------------------------------------*/
 /*-----------------------------------------------------*/
 
+
+
+estimate use ${result}/iv_cmm_mm_young.ster
+estimate store iv_cmm_mm_young
+estimates restore iv_cmm_mm_young
+predict lwage_hat
+estimates restore iv_cmm_mm_young
+adjust mm=0 mm_lt35=0 cmm=0 cmm_lt35=0 mm_ten_occ_lt35=0 mm_ten_occ=0, gen(lwage_mm_cmm_0)
+
+// Have to adjust the mean because of the GLS implementation shifts it by (1-rhohat)*const
+sum lwage if lwage_hat<. ,meanonly
+local lw_mean = r(mean)
+sum lwage_hat if lwage_hat<. ,meanonly
+replace lwage_hat = lwage_hat- r(mean)+`lw_mean'
+replace lwage_mm_cmm_0 = lwage_mm_cmm_0 - r(mean)+`lw_mean'
+
+
+matrix counter_factual_deciles = J(9,4,0.0)
+_pctile lwage_mm_cmm_0 if lt35==0, p(10(10)90)
+forvalues di =1/9{
+	matrix counter_factual_deciles[`di',1] = r(r`di')
+}
+_pctile lwage_mm_cmm_0  if lt35==0, p(10(10)90)
+forvalues di =1/9{
+	matrix counter_factual_deciles[`di',2] = r(r`di')
+}
+_pctile lwage_hat , p(10(10)90)
+forvalues di =1/9{
+	matrix counter_factual_deciles[`di',2] = r(r`di')
+}
+matrix colnames counter_factual_deciles = No~MM Baseline
+matrix rownames counter_factual_deciles = p10 p20 p30 p40 p50 p60 p70 p80 p90
+mat2txt, matrix(counter_factual_deciles ) saving( ${result}/counter_factual_young_deciles.csv) replace
+
 matrix ten_mm_cmm_105090_lt35 = J(4,3,0.)
 _pctile mm if lt35==1, p(10 50 90)
 matrix ten_mm_cmm_105090_lt35[2,2] = r(r2)
