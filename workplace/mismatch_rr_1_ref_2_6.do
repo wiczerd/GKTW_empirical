@@ -872,6 +872,7 @@ by id: gen cmm_1d = sum(lmm_1d*lten_occ)  if switch_occ==1  & lmm_1d<. & lten_oc
 
 
 by id: gen totexp = sum(lten_occ) if switch_occ==1
+gen     tmm = cmm if switch_occ==1
 replace cmm = cmm/totexp if switch_occ==1
 replace cmm_2nm = cmm_2nm/totexp if switch_occ==1
 replace cmm_1d  = cmm_1d /totexp if switch_occ==1
@@ -889,6 +890,7 @@ foreach i of local nlist{
 }
 
 sort id year
+replace tmm = tmm[_n-1] if switch_occ == 0 & id == id[_n-1]
 replace cmm = cmm[_n-1] if switch_occ == 0 & id == id[_n-1]
 replace cmm_2nm = cmm_2nm[_n-1] if switch_occ == 0 & id == id[_n-1]
 replace cmm_dim = cmm_dim[_n-1] if switch_occ == 0 & id == id[_n-1]
@@ -938,6 +940,7 @@ foreach i of local nlist{
 
 /*------------------------------------------------------------------------------------*/
 
+label var tmm "Tot Cumul Mismatch"
 label var cmm "Cumul Mismatch"
 label var cmm_2nm "Cumul Quadratic Mismatch"
 label var cmm_dim "Cumul All-Dim Mismatch"
