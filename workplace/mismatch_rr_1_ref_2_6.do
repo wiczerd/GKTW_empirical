@@ -526,7 +526,7 @@ corr ability_v ability_m ability_s skill_v skill_m skill_s
 matrix corr_vmp = r(C)
 matrix colnames corr_vmp = "W_Verb" "W_Math" "W_Soc" "O_Verb" "O_Math" "O_Soc" 
 matrix rownames corr_vmp = "Worker_Verb" "Worker_Math" "Worker_Soc" "Occ_Verb" "Occ_Math" "Occ_Soc"
-putexcel A1=matrix(corr_vmp, names) using ${result}/table_${diminitls}_corr.xls, replace
+//putexcel A1=matrix(corr_vmp, names) using ${result}/table_${diminitls}_corr.xls, replace
 
 /*------------------------------------------------------------------------------------*/
                                                                                                                              /* check later */
@@ -1026,12 +1026,15 @@ estimate save ${result}/bench_iv.ster, replace
 gen lt35 = (age<35)
 gen mm_lt35 = mm*lt35
 gen cmm_lt35 = cmm*lt35
+gen tmm_lt35 = tmm*lt35
 gen ten_occ_lt35 = tenure_occ*lt35
 gen mm_ten_occ_lt35 = tenure_occ*mm *lt35
 gen mm_ten_occ_iv_lt35 = ten_occ_iv*mm *lt35
 
 label var mm_lt35 "Mismatch, $< 35$"
 label var cmm_lt35 "Cumul Mismatch, $< 35$"
+label var tmm_lt35 "Tot Cumul Mismatch, $< 35$"
+
 label var mm_ten_occ_lt35 "Mismatch $\times$ Occ Ten, $< 35$"
 label var lt35 "< 35"
 /* could do it all with <30*/
@@ -1280,6 +1283,74 @@ qui forvalues iter=1/50{
 	drop *_R uhat
 }
 
+/*------------------------------------------------------------------------------------*/
+/* Total mismatch */
+
+global xlist  mm_ten_occ_lt35 mm_ten_occ ability_mean_ten_occ skill_mean_ten_occ $xlist_0
+xi: reg lwage mm mm_lt35 tmm tmm_lt35 $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d
+predict uhat, residuals
+reg uhat l.uhat, noc /*, fe  */
+global rhohat = _b["L.uhat"]
+drop uhat
+qui forvalues iter=1/50{
+	qui foreach zv of varlist mm mm_lt35 tmm tmm_lt35  $zlist ability_mean skill_mean $xlist lwage{
+		gen `zv'_R =`zv'
+		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
+*		replace `zv' = `zv'_R*(1-${rhohat}^2)^0.5 if obs1==1 & `zv'==.
+		_crcslbl `zv'_R `zv'
+	}
+	xi: reg lwage mm mm_lt35 tmm tmm_lt35  $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d
+	estimate save ${result}/ols_tmm_mm_young.ster, replace
+	predict uhat, residuals
+	reg uhat l.uhat, noc /*, fe  */
+	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){
+		qui foreach zv of varlist mm mm_lt35 tmm tmm_lt35  $zlist ability_mean skill_mean $xlist lwage{
+			replace `zv'= `zv'_R
+		}
+		drop *_R uhat
+		continue, break
+	}
+	global rhohat = _b["L.uhat"]*0.1 + 0.9*${rhohat}
+	
+	qui foreach zv of varlist mm mm_lt35 tmm tmm_lt35  $zlist ability_mean skill_mean $xlist lwage{
+		replace `zv'= `zv'_R
+	}
+	drop *_R uhat
+}
+
+
+global xlist  mm_ten_occ_lt35 mm_ten_occ  ability_mean_ten_occ skill_mean_ten_occ $xlist_0
+global ivlist mm_ten_occ_iv_lt35 mm_ten_occ_iv   ability_mean_ten_occ_iv skill_mean_ten_occ_iv $ivlist_0
+ivregress 2sls lwage mm mm_lt35 tmm tmm_lt35  ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d
+predict uhat, residuals
+reg uhat l.uhat, noc 
+global rhohat = _b["L.uhat"]
+drop uhat
+qui forvalues iter=1/50{
+	qui foreach zv of varlist mm mm_lt35 tmm tmm_lt35  $zlist ability_mean skill_mean $xlist $ivlist lwage{
+		gen `zv'_R =`zv'
+		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
+		_crcslbl `zv'_R `zv'
+	}
+	xi: ivregress 2sls lwage mm mm_lt35 tmm tmm_lt35  ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d
+	estimate save ${result}/iv_tmm_mm_young.ster, replace
+
+	predict uhat, residuals
+	reg uhat l.uhat, noc /*, fe  */
+	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){
+		qui foreach zv of varlist mm mm_lt35 tmm tmm_lt35  $zlist ability_mean skill_mean $xlist $ivlist lwage{
+			replace `zv'= `zv'_R
+		}
+		drop *_R uhat
+		continue, break
+	}
+	global rhohat = _b["L.uhat"]*0.1 + 0.9*${rhohat}
+	
+	qui foreach zv of varlist mm mm_lt35 tmm tmm_lt35  $zlist ability_mean skill_mean $xlist $ivlist lwage{
+		replace `zv'= `zv'_R
+	}
+	drop *_R uhat
+}
 
 
 /*-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-*/		   
@@ -1293,6 +1364,9 @@ estimate use ${result}/iv_mm_ten_young.ster
 estimate store iv_mm_ten_young
 estimate use ${result}/iv_cmm_mm_young.ster
 estimate store iv_cmm_mm_young
+estimate use ${result}/iv_tmm_mm_young.ster
+estimate store iv_tmm_mm_young
+
 
 estimate use ${result}/ols_mm_young.ster
 estimate store ols_mm_young
@@ -1300,6 +1374,8 @@ estimate use ${result}/ols_mm_ten_young.ster
 estimate store ols_mm_ten_young
 estimate use ${result}/ols_cmm_mm_young.ster
 estimate store ols_cmm_mm_young
+estimate use ${result}/ols_tmm_mm_young.ster
+estimate store ols_tmm_mm_young
 
 
 
@@ -1325,6 +1401,16 @@ esttab iv_mm_young iv_mm_ten_young iv_cmm_mm_young ols_mm_young ols_mm_ten_young
 		   mtitles("IV" "IV" "IV" "OLS" "OLS" "OLS") ///
 		   order(mm mm_lt35 mm_ten_occ mm_ten_occ_lt35 cmm cmm_lt35 ability_mean ability_mean_ten_occ skill_mean skill_mean_ten_occ ten* exp* oj $zlist _cons) ///
                     star(\sym{*} 0.10 \sym{**} 0.05 \sym{***} 0.01) replace
+
+esttab iv_mm_young iv_mm_ten_young iv_tmm_mm_young ols_mm_young ols_mm_ten_young ols_tmm_mm_young ///
+                   using ${result}/table_${diminitls}_tmm_young.tex, b(4) ///
+                   r2 nodepvars gaps not label nonotes substitute(\hline\hline \hline \hline "\hline  " "Standard" "${labtxt} standard" ///
+                   "\sym{\sym{\dagger}}" "$^{\dagger}$" "\sym{\sym{*}}" "$^{*}$" "\sym{\sym{**}}" "$^{**}$" "\sym{\sym{***}}" "$^{***}$") ///
+		   drop(_I* ten* exp* oj $zlist _cons) ///
+		   mtitles("IV" "IV" "IV" "OLS" "OLS" "OLS") ///
+		   order(mm mm_lt35 mm_ten_occ mm_ten_occ_lt35 tmm tmm_lt35 ability_mean ability_mean_ten_occ skill_mean skill_mean_ten_occ ten* exp* oj $zlist _cons) ///
+                   star(\sym{*} 0.10 \sym{**} 0.05 \sym{***} 0.01) replace
+	
 
 /*-----------------------------------------------------*/
 /*-----------------------------------------------------*/
