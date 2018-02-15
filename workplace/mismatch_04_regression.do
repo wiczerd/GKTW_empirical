@@ -930,15 +930,6 @@ graph export ${result}/fig_mm_mean_${diminitls}_rnk_exp.eps, replace
 /*------------------------------------------------------------------------------------*/
 * quasi param, residual wage trajectory by cmm
 
-global xlist_0 tenure_emp ten_emp2 tenure_occ ten_occ2 ten_occ3 exp exp2 exp3 oj
-global ivlist_0 ten_emp_iv ten_emp2_iv ten_occ_iv ten_occ2_iv ten_occ3_iv exp_iv exp2_iv exp3_iv oj_iv
-global xlist $xlist_0 ability_mean_ten_occ skill_mean_ten_occ
-global ivlist $ivlist_0 ability_mean_ten_occ_iv skill_mean_ten_occ_iv
-
-qui ivregress 2sls lwage ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d, vce(robust)
-predict rslwage, residual
-predict xb_lwage, xb
-
 cumul mm  if age == 30, gen(mm_rnk_30)  equal
 cumul cmm if age == 30, gen(cmm_rnk_30) equal
 local nlist "aa bb cc"
@@ -978,6 +969,59 @@ bysort id: egen exp_30_tmp1 = mean(exp) if (age == 30)
 bysort id: egen exp_30_tmp2 = max(exp_30_tmp1) 
 gen exp_30 = exp - exp_30_tmp2
 drop exp_30_tmp*
+
+
+global xlist_0 tenure_emp ten_emp2 tenure_occ ten_occ2 ten_occ3 exp exp2 exp3 oj
+global ivlist_0 ten_emp_iv ten_emp2_iv ten_occ_iv ten_occ2_iv ten_occ3_iv exp_iv exp2_iv exp3_iv oj_iv
+global xlist $xlist_0 ability_mean_ten_occ skill_mean_ten_occ
+global ivlist $ivlist_0 ability_mean_ten_occ_iv skill_mean_ten_occ_iv
+
+
+qui ivregress 2sls lwage ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d, vce(robust)
+predict rslwage, residual
+predict xb_lwage, xb
+
+/*
+ivregress 2sls lwage mm cmm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d
+predict uhat, residuals
+
+xtset id year
+reg uhat l.uhat, noc /*, fe  */
+global rhohat = _b["L.uhat"]
+drop uhat
+qui forvalues iter=1/50{
+	capture drop rslwage xb_lwage // this won't work on the first run
+	qui foreach zv of varlist mm cmm $zlist ability_mean skill_mean $xlist $ivlist lwage{
+		gen `zv'_R =`zv'
+		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
+		_crcslbl `zv'_R `zv'
+	}
+	xi: ivregress 2sls lwage mm cmm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d
+	estimate save ${result}/iv_cmm_mm_means.ster, replace
+
+	predict uhat, residuals
+	gen rslwage = uhat
+	predict xb_lwage, xb
+	
+	
+	reg uhat l.uhat, noc /*, fe  */
+	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){
+		qui foreach zv of varlist mm cmm $zlist ability_mean skill_mean $xlist $ivlist lwage{
+			replace `zv'= `zv'_R
+		}
+		drop *_R uhat
+		continue, break
+	}
+	global rhohat = _b["L.uhat"]*0.1 + 0.9*${rhohat}
+	
+	qui foreach zv of varlist mm cmm $zlist ability_mean skill_mean $xlist $ivlist lwage{
+		replace `zv'= `zv'_R
+	}
+	drop *_R uhat
+}
+replace xb_lwage = xb_lwage /${rhohat}
+replace rslwage = rslwage /${rhohat}
+*/
 
 egen mean_rslwage_mm_10 = mean(rslwage) if mm_rnk_30 >= .00 & mm_rnk_30 <=  .10, by(exp_30)
 egen mean_rslwage_mm_90 = mean(rslwage) if mm_rnk_30 >= .90 & mm_rnk_30 <= 1.00, by(exp_30)
@@ -1736,6 +1780,9 @@ qui forvalues iter=1/50{
 	}
 	xi: ivregress 2sls lwage cmm_aa cmm_bb cmm_cc absmm_?? ($xlist = $ivlist) $zlist ability_?? skill_?? i.ind_1d i.occ_1d 
 	estimate save ${result}/iv_ind_cmm_mm_means.ster, replace
+	_pctile absmm_aa if e(sample)==1, p(10 50 90)
+	global p10absmm_aa = r(r1)
+	global p90absmm_aa = r(r3)
 	predict uhat, residuals
 	reg uhat l.uhat , noc
 	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){

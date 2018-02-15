@@ -17,8 +17,8 @@ set more off
 /* CHANGE THIS PART */
 
 //global base_folder "/media/satoshi/portable_hdd/Dropbox/data/mismatch/nlsy79" 
-global base_folder "/media/satoshi/second_hdd/Dropbox/data/mismatch/nlsy79" 
-//global base_folder "~/workspace/GKTW_empirical/repo"
+//global base_folder "/media/satoshi/second_hdd/Dropbox/data/mismatch/nlsy79" 
+global base_folder "~/workspace/GKTW_empirical/repo"
 
 /*--------------------------------------------------------------------------------------*/
 /*--------------------------------------------------------------------------------------*/
@@ -47,7 +47,7 @@ global onet $base_folder/onetstata
 *do $workplace/mismatch_11_ability_exp_regression.do 
 //do $workplace/mismatch_12_fixed_effects_regression.do 
 //do $workplace/mismatch_13_clustering_regression.do 
-do $workplace/mismatch_14_fgls_regression.do 
+///do $workplace/mismatch_14_fgls_regression.do 
 //do $workplace/mismatch_rr_1_ref_3_5.do 
 //do $workplace/mismatch_rr_1_ref_3_7.do 
 //do $workplace/mismatch_rr_1_ref_3_8.do 
