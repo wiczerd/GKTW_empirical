@@ -976,13 +976,13 @@ global ivlist_0 ten_emp_iv ten_emp2_iv ten_occ_iv ten_occ2_iv ten_occ3_iv exp_iv
 global xlist $xlist_0 ability_mean_ten_occ skill_mean_ten_occ
 global ivlist $ivlist_0 ability_mean_ten_occ_iv skill_mean_ten_occ_iv
 
-
-qui ivregress 2sls lwage ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d, vce(robust)
+/*
+qui ivregress 2sls lwage ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d, vce(cluster id)
 predict rslwage, residual
 predict xb_lwage, xb
+*/
 
-/*
-ivregress 2sls lwage mm cmm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d
+ivregress 2sls lwage ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d
 predict uhat, residuals
 
 xtset id year
@@ -991,22 +991,20 @@ global rhohat = _b["L.uhat"]
 drop uhat
 qui forvalues iter=1/50{
 	capture drop rslwage xb_lwage // this won't work on the first run
-	qui foreach zv of varlist mm cmm $zlist ability_mean skill_mean $xlist $ivlist lwage{
+	qui foreach zv of varlist $zlist ability_mean skill_mean $xlist $ivlist lwage{
 		gen `zv'_R =`zv'
 		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
 		_crcslbl `zv'_R `zv'
 	}
-	xi: ivregress 2sls lwage mm cmm ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d
-	estimate save ${result}/iv_cmm_mm_means.ster, replace
-
+	xi: ivregress 2sls lwage ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d
+*	estimate save ${result}/iv_means.ster, replace
 	predict uhat, residuals
 	gen rslwage = uhat
 	predict xb_lwage, xb
 	
-	
 	reg uhat l.uhat, noc /*, fe  */
 	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){
-		qui foreach zv of varlist mm cmm $zlist ability_mean skill_mean $xlist $ivlist lwage{
+		qui foreach zv of varlist $zlist ability_mean skill_mean $xlist $ivlist lwage{
 			replace `zv'= `zv'_R
 		}
 		drop *_R uhat
@@ -1014,14 +1012,13 @@ qui forvalues iter=1/50{
 	}
 	global rhohat = _b["L.uhat"]*0.1 + 0.9*${rhohat}
 	
-	qui foreach zv of varlist mm cmm $zlist ability_mean skill_mean $xlist $ivlist lwage{
+	qui foreach zv of varlist $zlist ability_mean skill_mean $xlist $ivlist lwage{
 		replace `zv'= `zv'_R
 	}
 	drop *_R uhat
 }
-replace xb_lwage = xb_lwage /${rhohat}
-replace rslwage = rslwage /${rhohat}
-*/
+replace rslwage = rslwage/(1 - ${rhohat})
+replace xb_lwage = xb_lwage/(1 - ${rhohat})
 
 egen mean_rslwage_mm_10 = mean(rslwage) if mm_rnk_30 >= .00 & mm_rnk_30 <=  .10, by(exp_30)
 egen mean_rslwage_mm_90 = mean(rslwage) if mm_rnk_30 >= .90 & mm_rnk_30 <= 1.00, by(exp_30)
@@ -1061,6 +1058,8 @@ legend(lab(1 "Best Matched 10%") ///
 ring(0) position(7) rows(2) ) ///
 saving(${result}/fig_rswprofile_${diminitls}_cmm_30, replace) 
 graph export ${result}/fig_rswprofile_${diminitls}_cmm_30.eps, replace
+graph export ${result}/fig_rswprofile_${diminitls}_cmm_30.png, replace
+
 
 /* mismatch at age 30 */
 twoway (lpoly rslwage exp_30 if mm_rnk_30 >= .00 & mm_rnk_30 <=  .10, lcolor(blue) lpattern(dash) lwidth(thick)) ///
@@ -1781,8 +1780,8 @@ qui forvalues iter=1/50{
 	xi: ivregress 2sls lwage cmm_aa cmm_bb cmm_cc absmm_?? ($xlist = $ivlist) $zlist ability_?? skill_?? i.ind_1d i.occ_1d 
 	estimate save ${result}/iv_ind_cmm_mm_means.ster, replace
 	_pctile absmm_aa if e(sample)==1, p(10 50 90)
-	global p10absmm_aa = r(r1)
-	global p90absmm_aa = r(r3)
+	global p10absmm_aa = r(r1)/(1-${rhohat})
+	global p90absmm_aa = r(r3)/(1-${rhohat})
 	predict uhat, residuals
 	reg uhat l.uhat , noc
 	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){
