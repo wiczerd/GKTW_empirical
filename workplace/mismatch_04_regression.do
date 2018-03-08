@@ -1782,6 +1782,9 @@ qui forvalues iter=1/50{
 	_pctile absmm_aa if e(sample)==1, p(10 50 90)
 	global p10absmm_aa = r(r1)/(1-${rhohat})
 	global p90absmm_aa = r(r3)/(1-${rhohat})
+	_pctile absmm_bb if e(sample)==1, p(10 50 90)
+	global p10absmm_bb = r(r1)/(1-${rhohat})
+	global p90absmm_bb = r(r3)/(1-${rhohat})
 	predict uhat, residuals
 	reg uhat l.uhat , noc
 	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){

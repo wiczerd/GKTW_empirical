@@ -1283,6 +1283,40 @@ qui forvalues iter=1/50{
 	drop *_R uhat
 }
 
+
+global xlist  ability_mean_ten_occ skill_mean_ten_occ $xlist_0
+global ivlist ability_mean_ten_occ_iv skill_mean_ten_occ_iv $ivlist_0
+ivregress 2sls lwage mm mm_lt35 cmm cmm_lt35  ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d
+predict uhat, residuals
+reg uhat l.uhat, noc 
+global rhohat = _b["L.uhat"]
+drop uhat
+ forvalues iter=1/50{
+	qui foreach zv of varlist mm mm_lt35 cmm cmm_lt35  $zlist ability_mean skill_mean $xlist $ivlist lwage{
+		gen `zv'_R =`zv'
+		replace `zv'= `zv'_R  - ${rhohat}*l.`zv'_R 
+		_crcslbl `zv'_R `zv'
+	}
+	xi: ivregress 2sls lwage mm mm_lt35 cmm cmm_lt35  ($xlist = $ivlist) $zlist ability_mean skill_mean i.ind_1d i.occ_1d
+	*estimate save ${result}/iv_cmm_mm_young.ster, replace
+
+	predict uhat, residuals
+	reg uhat l.uhat, noc /*, fe  */
+	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){
+		qui foreach zv of varlist mm mm_lt35 cmm cmm_lt35  $zlist ability_mean skill_mean $xlist $ivlist lwage{
+			replace `zv'= `zv'_R
+		}
+		drop *_R uhat
+		continue, break
+	}
+	global rhohat = _b["L.uhat"]*0.1 + 0.9*${rhohat}
+	
+	qui foreach zv of varlist mm mm_lt35 cmm cmm_lt35  $zlist ability_mean skill_mean $xlist $ivlist lwage{
+		replace `zv'= `zv'_R
+	}
+	drop *_R uhat
+}
+
 /*------------------------------------------------------------------------------------*/
 /* Total mismatch */
 
@@ -1418,6 +1452,24 @@ esttab iv_mm_young iv_mm_ten_young iv_tmm_mm_young ols_mm_young ols_mm_ten_young
 /*-----------------------------------------------------*/
 /*-----------------------------------------------------*/
 
+*looking at only current mismatch:
+estimate use ${result}/iv_cmm_mm_young.ster
+estimate store iv_cmm_mm_young
+estimates restore iv_cmm_mm_young
+predict lwage_hat
+estimates restore iv_cmm_mm_young
+adjust mm=0 mm_lt35=0 mm_ten_occ_lt35=0 mm_ten_occ=0, gen(lwage_mm_mmten_0)
+// Have to adjust the mean because of the GLS implementation shifts it by (1-rhohat)*const
+sum lwage if lwage_hat<. ,meanonly
+local lw_mean = r(mean)
+sum lwage_hat if lwage_hat<. ,meanonly
+replace lwage_hat = lwage_hat- r(mean)+`lw_mean'
+replace lwage_mm_mmten_0 = lwage_mm_mmten_0 - r(mean)+`lw_mean'
+
+sum lwage_mm_mmten_0 if lt35==0
+sum lwage_mm_mmten_0 if lt35==1
+
+drop lwage_hat
 
 
 estimate use ${result}/iv_cmm_mm_young.ster
