@@ -524,7 +524,7 @@ corr ability_v ability_m ability_s skill_v skill_m skill_s
 matrix corr_vmp = r(C)
 matrix colnames corr_vmp = "W_Verb" "W_Math" "W_Soc" "O_Verb" "O_Math" "O_Soc" 
 matrix rownames corr_vmp = "Worker_Verb" "Worker_Math" "Worker_Soc" "Occ_Verb" "Occ_Math" "Occ_Soc"
-putexcel A1=matrix(corr_vmp, names) using ${result}/table_${diminitls}_corr.xls, replace
+*putexcel A1=matrix(corr_vmp, names) using ${result}/table_${diminitls}_corr.xls, replace
 
 /*------------------------------------------------------------------------------------*/
                                                                                                                              /* check later */
@@ -2085,7 +2085,7 @@ forvalues pi = 1/5{
 
 matrix colnames pred_mm_pt_sd = "MM_5_Years" "MM_10_Years" "MM_15_Years" "Cumul_MM"
 matrix rownames pred_mm_pt_sd = "90_Percentile" "90_Percentile" "70_Percentile" "70_Percentile" "50_Percentile" "50_Percentile" "30_Percentile" "30_Percentile" "10_Percentile" "10_Percentile"
-putexcel A1=matrix(pred_mm_pt_sd, names) using ${result}/table_${diminitls}_pred_mm.xls, replace
+*putexcel A1=matrix(pred_mm_pt_sd, names) using ${result}/table_${diminitls}_pred_mm.xls, replace
 
 
 /*------------------------------------------------------------------------------------*/
@@ -2439,7 +2439,7 @@ forvalues pi = 1/5{
 
 matrix colnames pred_switch_pt_sd = "Mismatch" "Verbal" "Math" "Social"
 matrix rownames pred_switch_pt_sd = "90_Percentile" "90_Percentile" "70_Percentile" "70_Percentile" "50_Percentile" "50_Percentile" "30_Percentile" "30_Percentile" "10_Percentile" "10_Percentile"
-putexcel A1=matrix(pred_switch_pt_sd, names) using ${result}/table_${diminitls}_pred_switch.xls, replace
+*putexcel A1=matrix(pred_switch_pt_sd, names) using ${result}/table_${diminitls}_pred_switch.xls, replace
 
 /*------------------------------------------------------------------------------------*/
 /* probability of switch by mismatch */
@@ -2613,7 +2613,7 @@ foreach i of local nlist{
 
 matrix colnames mat_chng_skill = "Frac Pos Verbal" "Frac Pos Math" "Frac Pos Social" "Change in Verbal" "Change in Math" "Change in Social"
 matrix rownames mat_chng_skill = "All" "Less_than_High_School" "High_School" "Some_College"
-putexcel A1=matrix(mat_chng_skill, names) using ${result}/table_${diminitls}_chng_skill.xls, replace
+*putexcel A1=matrix(mat_chng_skill, names) using ${result}/table_${diminitls}_chng_skill.xls, replace
 
 /*------------------------------------------------------------------------------------*/
 /* predicted direction of switch */
@@ -2668,7 +2668,7 @@ forvalues pi = 1/6{
 
 matrix colnames pred_where_pt_sd = "Verbal" "Math" "Social"
 matrix rownames pred_where_pt_sd = "90_Pos" "90_Pos" "50_Pos" "50_Pos" "10_Pos" "10_Pos" "90_Neg" "90_Neg" "50_Neg" "50_Neg" "10_Neg" "10_Neg"
-putexcel A1=matrix(pred_where_pt_sd, names) using ${result}/table_${diminitls}_pred_where.xls, replace
+*putexcel A1=matrix(pred_where_pt_sd, names) using ${result}/table_${diminitls}_pred_where.xls, replace
 
 /*------------------------------------------------------------------------------------*/
 /* figure of the change in the direction of skills */
