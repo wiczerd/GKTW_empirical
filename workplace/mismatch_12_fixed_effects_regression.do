@@ -218,6 +218,7 @@ sort id year
 xtset id year
 
 by id: egen max_grade = max(grade)
+keep if max_grade <= 12
 
 xtdes
 count
@@ -277,19 +278,17 @@ use $data/yearly_03.dta, clear
 
 /* generate some  other covariates */
 
-gen univ = (grade>=16)
 gen hs = (grade>=12)
 gen lths = (grade<12)
-
+gen univ = (grade>=16)
 gen hispanic = (race == 1)
 gen black = (race == 2)
 gen yob = year - age
 
 label var lwage	"ln(Wage)"
-label var univ	"4-Year College"
 label var hs	"High School"
 label var lths	"< High School"
-
+label var univ	"4-Year College"
 label var hispanic	"Hispanic"
 label var black	"Black"
 label var yob "Year of Birth"
@@ -525,13 +524,12 @@ corr ability_v ability_m ability_s skill_v skill_m skill_s
 matrix corr_vmp = r(C)
 matrix colnames corr_vmp = "W_Verb" "W_Math" "W_Soc" "O_Verb" "O_Math" "O_Soc" 
 matrix rownames corr_vmp = "Worker_Verb" "Worker_Math" "Worker_Soc" "Occ_Verb" "Occ_Math" "Occ_Soc"
-putexcel A1=matrix(corr_vmp, names) using ${result}/table_${diminitls}_corr.xls, replace
+*putexcel A1=matrix(corr_vmp, names) using ${result}/table_${diminitls}_corr.xls, replace
 
 /*------------------------------------------------------------------------------------*/
                                                                                                                              /* check later */
-global zlist
-*global zlist lths univ hispanic black
-*global zlist univ hispanic black AFQT_std
+global zlist lths univ hispanic black
+*global zlist lths univ hispanic black AFQT_std
 
 /*------------------------------------------------------------------------------------*/
 /*------------------------------------------------------------------------------------*/
@@ -613,6 +611,7 @@ qui{
 	replace mm_neg = mm_neg/r(sd)
 	sum mm_pos
 	replace mm_pos = mm_pos/r(sd)
+	cumul mm, gen(mm_rnk) equal
 }
 
 /* re-normalize dimensions */
@@ -685,7 +684,9 @@ gen skill_mean_ten_occ2 = skill_mean*ten_occ2
 gen skill_mean_ten_occ_iv = skill_mean*ten_occ_iv
 gen skill_mean_ten_occ2_iv = skill_mean*ten_occ2_iv
 
-gen  ability_exp = ability_mean*exp
+gen ability_exp = ability_mean*exp
+gen ability_mean2 = ability_mean^2
+gen skill_mean2 = skill_mean^2
 
 local nlist "aa bb cc"
 foreach i of local nlist{
@@ -703,11 +704,15 @@ label var mm "Mismatch"
 label var mm_ten_occ "Mismatch $\times$ Occ Tenure"
 label var mm_neg "Negative Mismatch"
 label var mm_pos "Positive Mismatch"
-label var mm_neg_ten_occ "Pos. Mismatch $\times$ Occ Tenure"
-label var mm_pos_ten_occ "Neg. Mismatch $\times$ Occ Tenure"
+label var mm_neg_ten_occ "Neg. Mismatch $\times$ Occ Tenure"
+label var mm_pos_ten_occ "Pos. Mismatch $\times$ Occ Tenure"
 
 label var ability_mean "Worker Ability (Mean)"
+label var ability_mean2 "Worker Ability$^2$"
 label var skill_mean "Occ Reqs (Mean)"
+label var skill_mean2 "Occ Reqs$^2$"
+label var ability_exp "Worker Ability $\times$ Experience"
+
 label var ability_mean_ten_occ "Worker Ability $\times$ Occ Tenure"
 label var ability_mean_ten_occ2 "Worker Ability $\times$ Occ Tenure$^2 \times$ 100"
 label var skill_mean_ten_occ "Occ Reqs $\times$ Occ Tenure"
@@ -735,19 +740,6 @@ capture foreach i of local nlist{
 }
 
 /*------------------------------------------------------------------------------------*/
-/* summary statistics for mismatch */
-su mm
-forvalues i = 1/12 {
-	su mm if ind_1 == `i'
-}
-su mm if grade < 12
-su mm if grade == 12
-su mm if grade > 12
-forvalues i = 1/3 {
-	su mm if race == `i'
-}
-
-/*------------------------------------------------------------------------------------*/
 /*------------------------------------------------------------------------------------*/
 /*------------------------------------------------------------------------------------*/
 /* create cumulative measures */
@@ -765,6 +757,8 @@ by id: gen switch_count = sum(switch_occ)
 sort id year
 gen lmm = mm[_n-1] if switch_occ == 1
 replace lmm = lmm[_n-1] if switch_occ == 0 & id == id[_n-1]
+gen lmm_rnk = mm_rnk[_n-1] if switch_occ == 1
+replace lmm_rnk = lmm_rnk[_n-1] if switch_occ == 0 & id == id[_n-1]
 
 gen lten_occ = tenure_occ[_n-1] if switch_occ == 1
 replace lten_occ = lten_occ[_n-1] if switch_occ == 0 & id == id[_n-1]
