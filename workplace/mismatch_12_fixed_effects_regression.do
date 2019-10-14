@@ -913,7 +913,6 @@ estimate save ${result}/bench_iv.ster, replace
 /*------------------------------------------------------------------------------------*/
 /* mismatch */
 
-/*
 global xlist  ability_mean_ten_occ skill_mean_ten_occ $xlist_0
 xi: xtreg lwage mm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d, fe
 predict uhat, e
@@ -927,7 +926,7 @@ qui forvalues iter=1/50{
 		_crcslbl `zv'_R `zv'
 	}
 	xi: xtreg lwage mm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d, fe
-	estimate save ${result}/ols_mm_means.ster, replace
+	estimate save ${result}/ols_mm_means_fe.ster, replace
 	predict uhat, e
 	reg uhat l.uhat, noc /*, fe  */
 	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){
@@ -944,7 +943,6 @@ qui forvalues iter=1/50{
 	}
 	drop *_R uhat
 }
-*/
 
 global xlist  ability_mean_ten_occ skill_mean_ten_occ $xlist_0
 global ivlist ability_mean_ten_occ_iv skill_mean_ten_occ_iv $ivlist_0
@@ -982,7 +980,6 @@ qui forvalues iter=1/50{
 /*------------------------------------------------------------------------------------*/
 /* mismatch with tenure */
 
-/*
 global xlist  mm_ten_occ ability_mean_ten_occ skill_mean_ten_occ $xlist_0
 xi: xtreg lwage mm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d , fe
 predict uhat, e
@@ -996,7 +993,7 @@ qui forvalues iter=1/50{
 		_crcslbl `zv'_R `zv'
 	}
 	xi: xtreg lwage mm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d , fe
-	estimate save ${result}/ols_mm_ten_means.ster, replace
+	estimate save ${result}/ols_mm_ten_means_fe.ster, replace
 
 	predict uhat, e
 	reg uhat l.uhat, noc /*, fe  */
@@ -1014,7 +1011,7 @@ qui forvalues iter=1/50{
 	}
 	drop *_R uhat
 }
-*/
+
 
 global xlist  mm_ten_occ ability_mean_ten_occ skill_mean_ten_occ $xlist_0
 global ivlist mm_ten_occ_iv ability_mean_ten_occ_iv skill_mean_ten_occ_iv $ivlist_0
@@ -1052,7 +1049,7 @@ qui forvalues iter=1/50{
 /*------------------------------------------------------------------------------------*/
 /* cumulative mismatch */
 
-/*
+
 global xlist  mm_ten_occ ability_mean_ten_occ skill_mean_ten_occ $xlist_0
 xi: xtreg lwage mm cmm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d ,fe
 predict uhat, e
@@ -1066,7 +1063,7 @@ qui forvalues iter=1/50{
 		_crcslbl `zv'_R `zv'
 	}
 	xi: xtreg lwage mm cmm $xlist $zlist ability_mean skill_mean i.ind_1d i.occ_1d, fe
-	estimate save ${result}/ols_cmm_mm_means.ster, replace
+	estimate save ${result}/ols_cmm_mm_means_fe.ster, replace
 	predict uhat, e
 	reg uhat l.uhat, noc /*, fe  */
 	if( abs( _b["L.uhat"] - ${rhohat})<0.01 ){
@@ -1083,7 +1080,7 @@ qui forvalues iter=1/50{
 	}
 	drop *_R uhat
 }
-*/
+
 
 global xlist  mm_ten_occ ability_mean_ten_occ skill_mean_ten_occ $xlist_0
 global ivlist mm_ten_occ_iv ability_mean_ten_occ_iv skill_mean_ten_occ_iv $ivlist_0
@@ -1117,6 +1114,12 @@ qui forvalues iter=1/50{
 	}
 	drop *_R uhat
 }
+
+estimates use ${result}/iv_cmm_mm_means_fe.ster
+matrix b = e(b)
+predict baseline_fe_e , e
+
+
 /*------------------------------------------------------------------------------------*/
 /* mismatch with positive & negative components */
 /*
@@ -1328,6 +1331,13 @@ qui forvalues iter=1/50{
 
 /* mismatch */
 
+estimate use ${result}/ols_mm_means_fe.ster
+estimate store ols_mm_means_fe
+estimate use ${result}/ols_mm_ten_means_fe.ster
+estimate store ols_mm_ten_means_fe
+estimate use ${result}/ols_cmm_mm_means_fe.ster
+estimate store ols_cmm_mm_means_fe
+
 estimate use ${result}/iv_mm_means_fe.ster
 estimate store iv_mm_means_fe
 estimate use ${result}/iv_mm_ten_means_fe.ster
@@ -1346,7 +1356,7 @@ estimate store iv_cmm_mm_means_nofe
 
 esttab iv_mm_means_nofe iv_mm_ten_means_nofe iv_cmm_mm_means_nofe iv_mm_means_fe iv_mm_ten_means_fe iv_cmm_mm_means_fe ///
                    using ${result}/table_${diminitls}_nofe_fe.tex, b(4) ///
-                   r2 nodepvars gaps not label nonotes substitute(\hline\hline \hline \hline "\hline  " "Standard" "Robust standard" ///
+                   nodepvars gaps not label nonotes substitute(\hline\hline \hline \hline "\hline  "  ///
                    "\sym{\sym{\dagger}}" "$^{\dagger}$" "\sym{\sym{*}}" "$^{*}$" "\sym{\sym{**}}" "$^{**}$") ///
 		   drop(_I* ten* exp* oj $zlist _cons) ///
 		   mtitles("IV-GLS" "IV-GLS" "IV-GLS" "IV-GLS-FE" "IV-GLS-FE" "IV-GLS-FE") ///
@@ -1355,15 +1365,36 @@ esttab iv_mm_means_nofe iv_mm_ten_means_nofe iv_cmm_mm_means_nofe iv_mm_means_fe
 		     
 esttab iv_mm_means_nofe iv_mm_ten_means_nofe iv_cmm_mm_means_nofe iv_mm_means_fe iv_mm_ten_means_fe iv_cmm_mm_means_fe ///
                    using ${result}/table_apx_${diminitls}_nofe_fe.tex, b(4) se(4) ///
-                   r2 nodepvars nogaps label longtable substitute(\hline\hline \hline \hline "\hline  " ///
+                   nodepvars nogaps label longtable substitute(\hline\hline \hline \hline "\hline  " ///
 		   "Standard errors in parentheses" "All regressions include occupation and industry dummies." ///
-		   "\sym{\sym{\dagger}} \(p<0.10\), \sym{\sym{*}} \(p<0.05\), \sym{\sym{**}} \(p<0.01\)" "Robust standard errors in parentheses. \sym{\sym{\dagger}} \(p<0.10\), \sym{\sym{*}} \(p<0.05\), \sym{\sym{**}} \(p<0.01\)." ///
+		   "\sym{\sym{\dagger}} \(p<0.10\), \sym{\sym{*}} \(p<0.05\), \sym{\sym{**}} \(p<0.01\)" "GLS standard errors in parentheses. \sym{\sym{\dagger}} \(p<0.10\), \sym{\sym{*}} \(p<0.05\), \sym{\sym{**}} \(p<0.01\)." ///
                    "\sym{\sym{\dagger}}" "$^{\dagger}$" "\sym{\sym{*}}" "$^{*}$" "\sym{\sym{**}}" "$^{**}$") ///
 		   title("Wage Regression with Mismatch (Full Results)") ///
 		   drop(_I*) ///
 		   mtitles("IV-GLS" "IV-GLS" "IV-GLS" "IV-GLS-FE" "IV-GLS-FE" "IV-GLS-FE") ///
 		   order(mm mm_ten_occ cmm ability_mean_ten_occ skill_mean skill_mean_ten_occ ten* exp* oj $zlist _cons) ///
                    star(* 0.10 ** 0.05 *** 0.01) replace
+ 
+esttab iv_mm_means_fe iv_mm_ten_means_fe  iv_cmm_mm_means_fe  ols_mm_means_fe  ols_mm_ten_means_fe  ols_cmm_mm_means_fe  ///
+                   using ${result}/table_${diminitls}_fe.tex, b(4) ///
+                   nodepvars gaps not label nonotes substitute(\hline\hline \hline \hline "\hline  "  ///
+                   "\sym{\sym{\dagger}}" "$^{\dagger}$" "\sym{\sym{*}}" "$^{*}$" "\sym{\sym{**}}" "$^{**}$") ///
+		   drop(_I* ten* exp* oj $zlist _cons) ///
+		   mtitles("IV-GLS" "IV-GLS" "IV-GLS" "GLS" "GLS" "GLS") ///
+		   order(mm mm_ten_occ cmm ability_mean_ten_occ skill_mean skill_mean_ten_occ) ///
+                   star(* 0.10 ** 0.05 *** 0.01) replace
+		   
+esttab iv_mm_means_fe iv_mm_ten_means_fe  iv_cmm_mm_means_fe  ols_mm_means_fe  ols_mm_ten_means_fe  ols_cmm_mm_means_fe  ///
+                   using ${result}/table_apx_${diminitls}_fe.tex, b(4) se(4) ///
+                   r2 nodepvars nogaps label longtable substitute(\hline\hline \hline \hline "\hline  " ///
+		   "Standard errors in parentheses" "All regressions include occupation and industry dummies." ///
+		   "\sym{\sym{\dagger}} \(p<0.10\), \sym{\sym{*}} \(p<0.05\), \sym{\sym{**}} \(p<0.01\)" "GLS standard errors in parentheses. \sym{\sym{\dagger}} \(p<0.10\), \sym{\sym{*}} \(p<0.05\), \sym{\sym{**}} \(p<0.01\)." ///
+                   "\sym{\sym{\dagger}}" "$^{\dagger}$" "\sym{\sym{*}}" "$^{*}$" "\sym{\sym{**}}" "$^{**}$") ///
+		   title("Wage Regression with Mismatch (Full Results)") ///
+		   drop(_I*) ///
+		   mtitles("IV-GLS" "IV-GLS" "IV-GLS" "GLS" "GLS" "GLS") ///
+		   order(mm mm_ten_occ cmm ability_mean_ten_occ skill_mean skill_mean_ten_occ ten* exp* oj $zlist _cons) ///
+					star(* 0.10 ** 0.05 *** 0.01) replace
  
 estimate use ${result}/iv_mm_means_clu_fe.ster
 estimate store iv_mm_means_clu_fe
